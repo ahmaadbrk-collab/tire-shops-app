@@ -140,9 +140,9 @@ app.get("/api/backup", requireAuth, (req, res) => {
 });
 
 /* ---------- الملفات الثابتة (الواجهة) ---------- */
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(__dirname));
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.listen(PORT, () => {
