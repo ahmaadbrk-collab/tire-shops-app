@@ -147,6 +147,12 @@
           </div>
         </div>
       </div>
+      <div id="x-inv-wrap" style="display:none;">
+        <div class="row2">
+          <label class="field"><span>رقم الفاتورة</span><input id="x-invoice" placeholder="مثال: INV-1023"></label>
+          <label class="field"><span>اسم المورد</span><input id="x-supplier" placeholder="اسم المورد"></label>
+        </div>
+      </div>
       <label class="field"><span>الصندوق *</span><select id="x-box" disabled><option value="">اختر الصندوق أولاً</option></select></label>
       <label class="field"><span>المبلغ *</span><input type="number" step="0.01" id="x-amount" disabled placeholder="0.00"></label>
       <label class="field"><span>ملاحظات</span><input id="x-notes" placeholder="اختياري"></label>
@@ -188,17 +194,17 @@
       <button class="chip active" data-rview="network">تسوية الشبكة</button>
       <button class="chip" data-rview="custody">عهدة المحصلين</button>
       <button class="chip" data-rview="cash">إقفال الصندوق</button>
+      <button class="chip" data-rview="transfer">مناقلة صناديق</button>
     </div>
 
     <div id="rview-network" class="rview">
       <div class="card">
         <h3>🏦 تسوية الشبكة اليومية</h3>
-        <p class="note">مبيعات الشبكة (من نظام نقاط البيع) تُجمع تلقائياً من تبويب المبيعات. هنا تسجل بس كشف جهاز الشبكة والإيداع الفعلي بالبنك.</p>
+        <p class="note">مبيعات الشبكة (المسجلة بتبويب المبيعات) تُقارن تلقائياً بإيداع البنك الفعلي. أي فرق يترحّل تراكمياً لليوم اللي بعده حتى تتضح.</p>
         <div class="row2">
           <label class="field"><span>التاريخ *</span><input type="date" id="n-date"></label>
           <label class="field"><span>الفرع *</span><select id="n-branch"><option value="">اختر الفرع</option></select></label>
         </div>
-        <label class="field"><span>كشف جهاز الشبكة *</span><input type="number" step="0.01" id="n-pos" placeholder="0.00"></label>
         <label class="field"><span>إيداع البنك الفعلي *</span><input type="number" step="0.01" id="n-bank" placeholder="0.00"></label>
         <label class="field"><span>ملاحظات</span><input id="n-notes" placeholder="اختياري"></label>
         <button class="btn-primary" id="n-submit" disabled>حفظ التسوية</button>
@@ -216,6 +222,7 @@
           <label class="field"><span>التاريخ *</span><input type="date" id="c-date"></label>
           <label class="field"><span>الفرع *</span><select id="c-branch"><option value="">اختر الفرع</option></select></label>
         </div>
+        <label class="field"><span>من الصندوق *</span><select id="c-box"><option value="">اختر الصندوق</option></select></label>
         <label class="field"><span>المبلغ المسلم *</span><input type="number" step="0.01" id="c-amount" placeholder="0.00"></label>
         <label class="field"><span>اسم المحصل *</span><input id="c-collector" placeholder="اسم المحصل"></label>
         <label class="field"><span>ملاحظات</span><input id="c-notes" placeholder="اختياري"></label>
@@ -230,7 +237,7 @@
     <div id="rview-cash" class="rview" style="display:none;">
       <div class="card">
         <h3>💵 إقفال الصندوق اليومي</h3>
-        <p class="note">الرصيد المتوقع = مبيعات كاش اليوم − مصروفات نقدي اليوم − عهدة مسلمة اليوم. يحسب لحاله تلقائياً.</p>
+        <p class="note">الرصيد المتوقع = مبيعات كاش اليوم − مصروفات نقدي اليوم − عهدة مسلمة اليوم (من النقدي) ± المناقلات. يحسب لحاله تلقائياً.</p>
         <div class="row2">
           <label class="field"><span>التاريخ *</span><input type="date" id="cc-date"></label>
           <label class="field"><span>الفرع *</span><select id="cc-branch"><option value="">اختر الفرع</option></select></label>
@@ -244,15 +251,38 @@
         <div id="cc-list"></div>
       </div>
     </div>
+
+    <div id="rview-transfer" class="rview" style="display:none;">
+      <div class="card">
+        <h3>🔄 مناقلة بين الصناديق</h3>
+        <p class="note">مثال: تحويل مبلغ من النقدي للعهدة، أو من العهدة للبنك.</p>
+        <div class="row2">
+          <label class="field"><span>التاريخ *</span><input type="date" id="t-date"></label>
+          <label class="field"><span>الفرع *</span><select id="t-branch"><option value="">اختر الفرع</option></select></label>
+        </div>
+        <div class="row2">
+          <label class="field"><span>من صندوق *</span><select id="t-from"><option value="">اختر</option></select></label>
+          <label class="field"><span>إلى صندوق *</span><select id="t-to"><option value="">اختر</option></select></label>
+        </div>
+        <label class="field"><span>المبلغ *</span><input type="number" step="0.01" id="t-amount" placeholder="0.00"></label>
+        <label class="field"><span>ملاحظات</span><input id="t-notes" placeholder="اختياري"></label>
+        <button class="btn-primary" id="t-submit" disabled>حفظ المناقلة</button>
+      </div>
+      <div class="card">
+        <h3>📋 سجل المناقلات (<span id="t-count">0</span>)</h3>
+        <div id="t-list"></div>
+      </div>
+    </div>
   </section>
 
   <!-- تبويب الموظفين -->
   <section id="tab-employees" class="tabpane">
     <div class="card">
       <h3>➕ إضافة موظف</h3>
+      <label class="field"><span>الفرع *</span><select id="e-branch"><option value="">اختر الفرع</option></select></label>
       <div style="display:flex; gap:8px;">
         <input id="e-name" placeholder="اسم الموظف" style="flex:1;">
-        <button class="btn-primary" style="width:auto; padding:0 18px;" id="e-add">إضافة</button>
+        <button class="btn-primary" style="width:auto; padding:0 18px;" id="e-add" disabled>إضافة</button>
       </div>
     </div>
     <div class="card">
@@ -281,6 +311,7 @@
     <div class="chiprow">
       <button class="chip active" data-view="daily">ملخص فترة</button>
       <button class="chip" data-view="boxes">ملخص الصناديق</button>
+      <button class="chip" data-view="ledger">دفتر الصندوق</button>
       <button class="chip" data-view="statement">كشف حساب (دفع آجل)</button>
       <button class="chip" data-view="network">تسوية الشبكة</button>
       <button class="chip" data-view="custody">العهدة</button>
@@ -305,6 +336,22 @@
         </div>
       </div>
       <div id="d-boxes-branches"></div>
+    </div>
+    <div id="d-view-ledger" class="dview" style="display:none;">
+      <div class="card">
+        <h3>📒 دفتر الصندوق - كل حركة بالتفصيل</h3>
+        <div class="row2">
+          <label class="field"><span>الفرع *</span><select id="l-branch"></select></label>
+          <label class="field"><span>الصندوق *</span><select id="l-box"></select></label>
+        </div>
+        <div class="row2">
+          <label class="field"><span>من تاريخ</span><input type="date" id="l-from"></label>
+          <label class="field"><span>إلى تاريخ</span><input type="date" id="l-to"></label>
+        </div>
+      </div>
+      <div class="card">
+        <div id="l-list"></div>
+      </div>
     </div>
     <div id="d-view-statement" class="dview" style="display:none;">
       <div class="card">
@@ -346,7 +393,7 @@ const BRANCHES = ["فخامة الاطار", "روائع الافق", "روعة 
 const SALE_TYPES = ["كاش", "آجل", "شبكة", "اوتبيا", "كار ستيشن", "تابي", "تمارا"];
 const BNPL_TYPES = ["اوتبيا", "كار ستيشن", "تابي", "تمارا"];
 const BOX_TYPES = ["نقدي", "بنك", "عهدة"];
-const EXPENSE_CODES = ["تغذية", "وقود", "عمولة سائق", "صيانة", "قرطاسية", "كهرباء", "اتصالات", "نظافة", "سلفة موظف", "متفرقات"];
+const EXPENSE_CODES = ["تغذية", "وقود", "عمولة سائق", "صيانة", "قرطاسية", "كهرباء", "اتصالات", "نظافة", "سلفة موظف", "فاتورة مشتريات", "متفرقات"];
 const LS_KEYS = { sales:"tire-local-sales", expenses:"tire-local-expenses", income:"tire-local-income", employees:"tire-local-employees" };
 
 /* ==================== اتصال بالسيرفر (API) ==================== */
@@ -365,8 +412,13 @@ async function apiDelete(url){
   if(!r.ok) throw new Error('request failed');
   return r.json();
 }
+async function apiPatch(url){
+  const r = await fetch(url, {method:'PATCH'});
+  if(!r.ok) throw new Error('request failed');
+  return r.json();
+}
 
-let state = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [] };
+let state = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [] };
 
 async function loadAllFromServer(){
   try{
@@ -378,6 +430,7 @@ async function loadAllFromServer(){
     state.custody = data.custody || [];
     state.network = data.network || [];
     state.cashClose = data.cashClose || [];
+    state.transfers = data.transfers || [];
   }catch(e){
     toast('تعذر تحميل البيانات، تأكد من الاتصال');
   }
@@ -409,17 +462,26 @@ fillSelect(document.getElementById('i-company'), BNPL_TYPES, 'اختر الشر�
 fillSelect(document.getElementById('i-box'), BOX_TYPES, 'اختر الصندوق');
 fillSelect(document.getElementById('n-branch'), BRANCHES, 'اختر الفرع');
 fillSelect(document.getElementById('c-branch'), BRANCHES, 'اختر الفرع');
+fillSelect(document.getElementById('c-box'), BOX_TYPES, 'اختر الصندوق');
 fillSelect(document.getElementById('cc-branch'), BRANCHES, 'اختر الفرع');
+fillSelect(document.getElementById('t-branch'), BRANCHES, 'اختر الفرع');
+fillSelect(document.getElementById('t-from'), BOX_TYPES, 'اختر');
+fillSelect(document.getElementById('t-to'), BOX_TYPES, 'اختر');
 document.getElementById('s-date').value = todayStr();
 document.getElementById('x-date').value = todayStr();
 document.getElementById('i-date').value = todayStr();
 document.getElementById('n-date').value = todayStr();
 document.getElementById('c-date').value = todayStr();
 document.getElementById('cc-date').value = todayStr();
+document.getElementById('t-date').value = todayStr();
 document.getElementById('d-date-from').value = todayStr();
 document.getElementById('d-date-to').value = todayStr();
 document.getElementById('d-box-from').value = todayStr();
 document.getElementById('d-box-to').value = todayStr();
+fillSelect(document.getElementById('l-branch'), BRANCHES, 'اختر الفرع');
+fillSelect(document.getElementById('l-box'), BOX_TYPES, 'اختر الصندوق');
+document.getElementById('l-to').value = todayStr();
+['l-branch','l-box','l-from','l-to'].forEach(id=>document.getElementById(id).addEventListener('change', renderDashboard));
 
 /* ==================== التنقل بين قسم التسويات الفرعي ==================== */
 document.querySelectorAll('#tab-recon .chip').forEach(chip=>{
@@ -552,11 +614,15 @@ const xSubmit = document.getElementById('x-submit');
 const xEmpWrap = document.getElementById('x-emp-wrap');
 
 function refreshEmployeeSelect(){
-  fillSelect(document.getElementById('x-employee'), state.employees.map(e=>e.name), 'اختر الموظف');
+  const branch = document.getElementById('x-branch').value;
+  const names = branch ? state.employees.filter(e=>e.branch===branch).map(e=>e.name) : state.employees.map(e=>e.name);
+  fillSelect(document.getElementById('x-employee'), names, 'اختر الموظف');
 }
 function updateExpenseForm(){
   const code = xCode.value;
   xEmpWrap.style.display = (code === 'سلفة موظف') ? 'block' : 'none';
+  document.getElementById('x-inv-wrap').style.display = (code === 'فاتورة مشتريات') ? 'block' : 'none';
+  if(code === 'سلفة موظف') refreshEmployeeSelect();
   if(code){ fillSelect(xBox, BOX_TYPES, 'اختر الصندوق أولاً'); xBox.disabled=false; }
   else { xBox.disabled = true; xBox.value=''; }
   updateExpenseAmountState();
@@ -570,10 +636,10 @@ function updateExpenseSubmitState(){
   xSubmit.disabled = !ok;
 }
 xCode.addEventListener('change', updateExpenseForm);
+document.getElementById('x-branch').addEventListener('change', ()=>{ refreshEmployeeSelect(); updateExpenseSubmitState(); });
 xBox.addEventListener('change', updateExpenseAmountState);
 xAmount.addEventListener('input', updateExpenseSubmitState);
 document.getElementById('x-date').addEventListener('change', updateExpenseSubmitState);
-document.getElementById('x-branch').addEventListener('change', updateExpenseSubmitState);
 
 document.getElementById('x-emp-toggle').addEventListener('click', ()=>{
   const w = document.getElementById('x-emp-new-wrap');
@@ -581,9 +647,11 @@ document.getElementById('x-emp-toggle').addEventListener('click', ()=>{
 });
 document.getElementById('x-emp-add').addEventListener('click', async ()=>{
   const name = document.getElementById('x-emp-new').value.trim();
+  const branch = document.getElementById('x-branch').value;
   if(!name) return;
+  if(!branch){ toast('اختر الفرع أولاً'); return; }
   try{
-    await apiPost('/api/employees', { name });
+    await apiPost('/api/employees', { name, branch });
     document.getElementById('x-emp-new').value = '';
     document.getElementById('x-emp-new-wrap').style.display = 'none';
     toast('تمت إضافة الموظف');
@@ -595,14 +663,17 @@ document.getElementById('x-emp-add').addEventListener('click', async ()=>{
 xSubmit.addEventListener('click', async ()=>{
   xSubmit.disabled = true;
   try{
-    await apiPost('/api/expenses', {
+    const r = await apiPost('/api/expenses', {
       date: document.getElementById('x-date').value, branch: document.getElementById('x-branch').value,
       code: xCode.value, box: xBox.value, amount: parseFloat(xAmount.value)||0,
       employee: xCode.value==='سلفة موظف' ? document.getElementById('x-employee').value : '',
+      invoiceNo: xCode.value==='فاتورة مشتريات' ? document.getElementById('x-invoice').value : '',
+      supplier: xCode.value==='فاتورة مشتريات' ? document.getElementById('x-supplier').value : '',
       notes: document.getElementById('x-notes').value
     });
-    toast('تمت إضافة المصروف');
+    toast('تمت إضافة المصروف · ' + (r.archiveNo||''));
     xAmount.value=''; document.getElementById('x-notes').value='';
+    document.getElementById('x-invoice').value=''; document.getElementById('x-supplier').value='';
     await loadAllFromServer();
   }catch(e){ toast('تعذر الحفظ، تأكد من الاتصال'); }
   updateExpenseSubmitState();
@@ -711,39 +782,62 @@ document.getElementById('i-list').addEventListener('click', async (e)=>{
 const nSubmit = document.getElementById('n-submit');
 function updateNetworkSubmitState(){
   const ok = document.getElementById('n-date').value && document.getElementById('n-branch').value &&
-    document.getElementById('n-pos').value && document.getElementById('n-bank').value;
+    document.getElementById('n-bank').value;
   nSubmit.disabled = !ok;
 }
-['n-date','n-branch','n-pos','n-bank'].forEach(id=>document.getElementById(id).addEventListener('input', updateNetworkSubmitState));
+['n-date','n-branch','n-bank'].forEach(id=>document.getElementById(id).addEventListener('input', updateNetworkSubmitState));
 nSubmit.addEventListener('click', async ()=>{
   nSubmit.disabled = true;
   try{
     await apiPost('/api/network', {
       date: document.getElementById('n-date').value, branch: document.getElementById('n-branch').value,
-      pos_statement: parseFloat(document.getElementById('n-pos').value)||0,
       bank_deposit: parseFloat(document.getElementById('n-bank').value)||0,
       notes: document.getElementById('n-notes').value
     });
     toast('تم حفظ تسوية الشبكة');
-    document.getElementById('n-pos').value=''; document.getElementById('n-bank').value=''; document.getElementById('n-notes').value='';
+    document.getElementById('n-bank').value=''; document.getElementById('n-notes').value='';
     await loadAllFromServer();
   }catch(e){ toast('تعذر الحفظ'); }
   updateNetworkSubmitState();
 });
+function networkSystemSales(date, branch){
+  return state.sales.filter(s=>s.date===date && s.branch===branch && s.type==='شبكة').reduce((a,r)=>a+r.net,0);
+}
+// يحسب الرصيد التراكمي المرحّل لكل فرع بترتيب التاريخ تصاعدياً
+function networkRunningBalances(){
+  const byBranch = {};
+  BRANCHES.forEach(b=>{
+    const entries = state.network.filter(n=>n.branch===b).slice().sort((a,z)=>a.date.localeCompare(z.date));
+    let running = 0;
+    byBranch[b] = entries.map(n=>{
+      const sysAmt = networkSystemSales(n.date, b);
+      const dayDiff = sysAmt - (n.bank_deposit||0);
+      running += dayDiff;
+      return { ...n, sysAmt, dayDiff, running };
+    });
+  });
+  return byBranch;
+}
 function renderNetwork(){
   document.getElementById('n-count').textContent = state.network.length;
   const el = document.getElementById('n-list');
   if(state.network.length===0){ el.innerHTML = '<div class="empty">ما فيه تسويات مسجلة بعد</div>'; return; }
-  el.innerHTML = state.network.slice(0,50).map(n=>{
-    const diff = (n.pos_statement||0) - (n.bank_deposit||0);
+  const byBranch = networkRunningBalances();
+  const rows = [];
+  BRANCHES.forEach(b=>{ (byBranch[b]||[]).forEach(n=>rows.push(n)); });
+  rows.sort((a,z)=> z.date.localeCompare(a.date));
+  el.innerHTML = rows.slice(0,60).map(n=>{
+    const matched = Math.abs(n.running) <= 0.01;
     return `
     <div class="list-item">
       <div>
-        <div><span class="pill ${branchPillClass(n.branch)}">🏪 ${n.branch}</span></div>
-        <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${n.date} · جهاز: ${money(n.pos_statement)} · بنك: ${money(n.bank_deposit)}${n.notes?' · '+n.notes:''}</div>
+        <div><span class="pill ${branchPillClass(n.branch)}">🏪 ${n.branch}</span>
+          <span style="font-size:11px; padding:1px 8px; border-radius:999px; background:${matched?'#F0FDF4':'#FEF3C7'}; color:${matched?'#15803D':'#B45309'};">${matched?'مطابق':'مرحّل لليوم التالي'}</span>
+        </div>
+        <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${n.date} · نظام: ${money(n.sysAmt)} · بنك: ${money(n.bank_deposit)}${n.notes?' · '+n.notes:''}</div>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-weight:700; color:${Math.abs(diff)>0.01?'#DC2626':'#15803D'};">${money(diff)}</span>
+        <span style="font-weight:700; color:${matched?'#15803D':'#D97706'};">${money(n.running)}</span>
         <button class="del-btn" data-del-net="${n.id}">🗑</button>
       </div>
     </div>`;
@@ -759,20 +853,21 @@ document.getElementById('n-list').addEventListener('click', async (e)=>{
 const cSubmit = document.getElementById('c-submit');
 function updateCustodySubmitState(){
   const ok = document.getElementById('c-date').value && document.getElementById('c-branch').value &&
-    document.getElementById('c-amount').value && document.getElementById('c-collector').value.trim();
+    document.getElementById('c-box').value && document.getElementById('c-amount').value && document.getElementById('c-collector').value.trim();
   cSubmit.disabled = !ok;
 }
-['c-date','c-branch','c-amount','c-collector'].forEach(id=>document.getElementById(id).addEventListener('input', updateCustodySubmitState));
+['c-date','c-branch','c-box','c-amount','c-collector'].forEach(id=>document.getElementById(id).addEventListener('input', updateCustodySubmitState));
 cSubmit.addEventListener('click', async ()=>{
   cSubmit.disabled = true;
   try{
-    await apiPost('/api/custody', {
+    const r = await apiPost('/api/custody', {
       date: document.getElementById('c-date').value, branch: document.getElementById('c-branch').value,
+      box: document.getElementById('c-box').value,
       amount: parseFloat(document.getElementById('c-amount').value)||0,
       collector: document.getElementById('c-collector').value.trim(),
       notes: document.getElementById('c-notes').value
     });
-    toast('تم حفظ تسليم العهدة');
+    toast('تم حفظ تسليم العهدة · ' + (r.archiveNo||''));
     document.getElementById('c-amount').value=''; document.getElementById('c-notes').value='';
     await loadAllFromServer();
   }catch(e){ toast('تعذر الحفظ'); }
@@ -785,20 +880,22 @@ function renderCustody(){
   el.innerHTML = state.custody.slice(0,50).map(c=>`
     <div class="list-item">
       <div>
-        <div><span class="pill ${branchPillClass(c.branch)}">🏪 ${c.branch}</span><span style="font-size:12px;color:#64748b;">${c.collector}</span></div>
-        <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${c.date}${c.notes?' · '+c.notes:''}</div>
+        <div><span class="pill ${branchPillClass(c.branch)}">🏪 ${c.branch}</span><span class="pill pill-box">${c.box||'نقدي'}</span><span style="font-size:12px;color:#64748b;">${c.collector}</span></div>
+        <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${c.date} · ${c.archiveNo||''}${c.notes?' · '+c.notes:''}</div>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
         <span class="amount-pos">${money(c.amount)}</span>
+        <button class="btn-outline" style="width:auto; padding:4px 10px; font-size:11px; ${c.forwarded?'background:#F0FDF4;color:#15803D;border-color:#BBF7D0;':''}" data-toggle-fwd="${c.id}">${c.forwarded?'✅ رُحّلت':'⏳ لم تُرحّل'}</button>
         <button class="del-btn" data-del-cus="${c.id}">🗑</button>
       </div>
     </div>
   `).join('');
 }
 document.getElementById('c-list').addEventListener('click', async (e)=>{
-  const id = e.target.closest('[data-del-cus]')?.dataset.delCus;
-  if(!id) return;
-  try{ await apiDelete('/api/custody/'+id); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); }
+  const delId = e.target.closest('[data-del-cus]')?.dataset.delCus;
+  if(delId){ try{ await apiDelete('/api/custody/'+delId); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); } return; }
+  const fwdId = e.target.closest('[data-toggle-fwd]')?.dataset.toggleFwd;
+  if(fwdId){ try{ await apiPatch('/api/custody/'+fwdId+'/forwarded'); await loadAllFromServer(); }catch(err){ toast('تعذر التحديث'); } }
 });
 
 /* ==================== إقفال الصندوق ==================== */
@@ -825,8 +922,10 @@ ccSubmit.addEventListener('click', async ()=>{
 function expectedCash(date, branch){
   const cash = state.sales.filter(s=>s.date===date && s.branch===branch && s.type==='كاش').reduce((a,r)=>a+r.net,0);
   const exp = state.expenses.filter(x=>x.date===date && x.branch===branch && x.box==='نقدي').reduce((a,r)=>a+r.amount,0);
-  const cus = state.custody.filter(c=>c.date===date && c.branch===branch).reduce((a,r)=>a+r.amount,0);
-  return cash - exp - cus;
+  const cus = state.custody.filter(c=>c.date===date && c.branch===branch && (c.box||'نقدي')==='نقدي').reduce((a,r)=>a+r.amount,0);
+  const trfOut = state.transfers.filter(t=>t.date===date && t.branch===branch && t.fromBox==='نقدي').reduce((a,r)=>a+r.amount,0);
+  const trfIn = state.transfers.filter(t=>t.date===date && t.branch===branch && t.toBox==='نقدي').reduce((a,r)=>a+r.amount,0);
+  return cash - exp - cus - trfOut + trfIn;
 }
 function renderCashClose(){
   document.getElementById('cc-count').textContent = state.cashClose.length;
@@ -843,23 +942,82 @@ function renderCashClose(){
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
         <span style="font-weight:700; color:${Math.abs(diff)>0.01?'#DC2626':'#15803D'};">${money(diff)}</span>
+        <button class="btn-outline" style="width:auto; padding:4px 10px; font-size:11px; ${c.closed?'background:#F0FDF4;color:#15803D;border-color:#BBF7D0;':''}" data-toggle-closed="${c.id}">${c.closed?'🔒 مقفل':'🔓 مفتوح'}</button>
         <button class="del-btn" data-del-cc="${c.id}">🗑</button>
       </div>
     </div>`;
   }).join('');
 }
 document.getElementById('cc-list').addEventListener('click', async (e)=>{
-  const id = e.target.closest('[data-del-cc]')?.dataset.delCc;
+  const delId = e.target.closest('[data-del-cc]')?.dataset.delCc;
+  if(delId){ try{ await apiDelete('/api/cash-close/'+delId); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); } return; }
+  const clId = e.target.closest('[data-toggle-closed]')?.dataset.toggleClosed;
+  if(clId){ try{ await apiPatch('/api/cash-close/'+clId+'/closed'); await loadAllFromServer(); }catch(err){ toast('تعذر التحديث'); } }
+});
+
+/* ==================== مناقلة بين الصناديق ==================== */
+const tSubmit = document.getElementById('t-submit');
+function updateTransferSubmitState(){
+  const from = document.getElementById('t-from').value, to = document.getElementById('t-to').value;
+  const ok = document.getElementById('t-date').value && document.getElementById('t-branch').value &&
+    from && to && from !== to && document.getElementById('t-amount').value && parseFloat(document.getElementById('t-amount').value) > 0;
+  tSubmit.disabled = !ok;
+}
+['t-date','t-branch','t-from','t-to','t-amount'].forEach(id=>document.getElementById(id).addEventListener('input', updateTransferSubmitState));
+tSubmit.addEventListener('click', async ()=>{
+  tSubmit.disabled = true;
+  try{
+    const r = await apiPost('/api/transfers', {
+      date: document.getElementById('t-date').value, branch: document.getElementById('t-branch').value,
+      fromBox: document.getElementById('t-from').value, toBox: document.getElementById('t-to').value,
+      amount: parseFloat(document.getElementById('t-amount').value)||0,
+      notes: document.getElementById('t-notes').value
+    });
+    toast('تم حفظ المناقلة · ' + (r.archiveNo||''));
+    document.getElementById('t-amount').value=''; document.getElementById('t-notes').value='';
+    document.getElementById('t-from').value=''; document.getElementById('t-to').value='';
+    await loadAllFromServer();
+  }catch(e){ toast('تعذر الحفظ'); }
+  updateTransferSubmitState();
+});
+function renderTransfers(){
+  document.getElementById('t-count').textContent = state.transfers.length;
+  const el = document.getElementById('t-list');
+  if(state.transfers.length===0){ el.innerHTML = '<div class="empty">ما فيه مناقلات مسجلة بعد</div>'; return; }
+  el.innerHTML = state.transfers.slice(0,50).map(t=>`
+    <div class="list-item">
+      <div>
+        <div><span class="pill ${branchPillClass(t.branch)}">🏪 ${t.branch}</span>
+          <span class="pill pill-box">${t.fromBox}</span> → <span class="pill pill-box">${t.toBox}</span>
+        </div>
+        <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${t.date} · ${t.archiveNo||''}${t.notes?' · '+t.notes:''}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-weight:700;">${money(t.amount)}</span>
+        <button class="del-btn" data-del-trf="${t.id}">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+document.getElementById('t-list').addEventListener('click', async (e)=>{
+  const id = e.target.closest('[data-del-trf]')?.dataset.delTrf;
   if(!id) return;
-  try{ await apiDelete('/api/cash-close/'+id); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); }
+  try{ await apiDelete('/api/transfers/'+id); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); }
 });
 
 /* ==================== تبويب الموظفين ==================== */
+function updateEmpAddState(){
+  const ok = document.getElementById('e-branch').value && document.getElementById('e-name').value.trim();
+  document.getElementById('e-add').disabled = !ok;
+}
+document.getElementById('e-branch').addEventListener('change', updateEmpAddState);
+document.getElementById('e-name').addEventListener('input', updateEmpAddState);
 document.getElementById('e-add').addEventListener('click', async ()=>{
   const name = document.getElementById('e-name').value.trim();
-  if(!name) return;
+  const branch = document.getElementById('e-branch').value;
+  if(!name || !branch) return;
   try{
-    await apiPost('/api/employees', { name });
+    await apiPost('/api/employees', { name, branch });
     document.getElementById('e-name').value = '';
     toast('تمت إضافة الموظف');
     await loadAllFromServer();
@@ -869,7 +1027,7 @@ function renderEmployeesTab(){
   document.getElementById('e-count').textContent = state.employees.length;
   const listEl = document.getElementById('e-list');
   listEl.innerHTML = state.employees.length===0 ? '<div class="empty">ما فيه موظفين مسجلين بعد</div>' :
-    state.employees.map(e=>`<span class="emp-chip"><button class="del-btn" data-del-emp2="${e.id}" style="font-size:12px;">🗑</button>${e.name}</span>`).join('');
+    state.employees.map(e=>`<span class="emp-chip"><button class="del-btn" data-del-emp2="${e.id}" style="font-size:12px;">🗑</button>${e.name} · ${e.branch||'-'}</span>`).join('');
 
   const sumEl = document.getElementById('e-summary');
   if(state.employees.length===0){ sumEl.innerHTML = '<div class="empty">ما فيه موظفين بعد</div>'; return; }
@@ -877,11 +1035,11 @@ function renderEmployeesTab(){
     const advances = state.expenses.filter(x=>x.code==='سلفة موظف' && x.employee===emp.name);
     const total = advances.reduce((a,r)=>a+r.amount,0);
     const last = advances.reduce((max,r)=> (!max || r.date>max) ? r.date : max, null);
-    return {name: emp.name, total, count: advances.length, last};
+    return {name: emp.name, branch: emp.branch, total, count: advances.length, last};
   });
   sumEl.innerHTML = rows.map(r=>`
     <div class="box-row">
-      <span style="font-weight:600;">${r.name}</span>
+      <span style="font-weight:600;">${r.name} <span style="color:#94A3B8; font-weight:400; font-size:11px;">(${r.branch||'-'})</span></span>
       <span style="display:flex; gap:14px; align-items:center;">
         <span style="color:#64748B;">${r.count} سلفة</span>
         ${r.last ? `<span style="color:#94A3B8; font-size:11px;">آخر: ${r.last}</span>` : ''}
@@ -947,19 +1105,27 @@ function renderDashboard(){
   const boxSales = state.sales.filter(s=>inRange(s.date, bFrom, bTo));
   const boxExpenses = state.expenses.filter(x=>inRange(x.date, bFrom, bTo));
   const boxIncome = state.income.filter(i=>inRange(i.date, bFrom, bTo));
+  const boxCustody = state.custody.filter(c=>inRange(c.date, bFrom, bTo));
+  const boxTransfers = state.transfers.filter(t=>inRange(t.date, bFrom, bTo));
   const boxesEl = document.getElementById('d-boxes-branches');
   boxesEl.innerHTML = BRANCHES.map(b=>{
     const rows = BOX_TYPES.map(box=>{
       const rev = boxSales.filter(s=>s.branch===b && s.box===box && !BNPL_TYPES.includes(s.type)).reduce((a,r)=>a+r.net,0);
       const bnplRev = boxIncome.filter(i=>i.branch===b && i.box===box).reduce((a,r)=>a+r.amount,0);
       const cost = boxExpenses.filter(x=>x.branch===b && x.box===box).reduce((a,r)=>a+r.amount,0);
-      const revenue = rev+bnplRev; const net = revenue-cost;
+      const custodyOut = boxCustody.filter(c=>c.branch===b && (c.box||'نقدي')===box).reduce((a,r)=>a+r.amount,0);
+      const custodyIn = box==='عهدة' ? boxCustody.filter(c=>c.branch===b).reduce((a,r)=>a+r.amount,0) : 0;
+      const transferOut = boxTransfers.filter(t=>t.branch===b && t.fromBox===box).reduce((a,r)=>a+r.amount,0);
+      const transferIn = boxTransfers.filter(t=>t.branch===b && t.toBox===box).reduce((a,r)=>a+r.amount,0);
+      const revenue = rev+bnplRev+custodyIn+transferIn;
+      const cost2 = cost+custodyOut+transferOut;
+      const net = revenue-cost2;
       return `
         <div class="box-row">
           <span style="font-weight:600;">${box}</span>
           <span style="display:flex; gap:14px;">
             <span style="color:#15803D;">+${money(revenue)}</span>
-            <span style="color:#DC2626;">-${money(cost)}</span>
+            <span style="color:#DC2626;">-${money(cost2)}</span>
             <span style="font-weight:700; color:${net>=0?'#1E293B':'#DC2626'};">${money(net)}</span>
           </span>
         </div>`;
@@ -1016,6 +1182,58 @@ function renderDashboard(){
       <div class="box-row"><span class="pill ${branchPillClass(r.branch)}">🏪 ${r.branch}</span><span>${r.count} تسليم · <b>${money(r.total)}</b></span></div>
     `).join('');
   }
+
+  // دفتر الصندوق التفصيلي (كل حركة بالترتيب الزمني)
+  renderLedger();
+}
+
+function renderLedger(){
+  const branch = document.getElementById('l-branch').value;
+  const box = document.getElementById('l-box').value;
+  const lFrom = document.getElementById('l-from').value;
+  const lTo = document.getElementById('l-to').value || todayStr();
+  const el = document.getElementById('l-list');
+  if(!branch || !box){ el.innerHTML = '<div class="empty">اختر الفرع والصندوق لعرض الحركات</div>'; return; }
+
+  const moves = [];
+  state.sales.filter(s=>s.branch===branch && s.box===box && !BNPL_TYPES.includes(s.type) && inRange(s.date,lFrom,lTo)).forEach(s=>{
+    moves.push({date:s.date, created_at:s.created_at, kind:'مبيعات ('+s.type+')', archiveNo:s.archiveNo, amount:s.net, dir:1});
+  });
+  state.income.filter(i=>i.branch===branch && i.box===box && inRange(i.date,lFrom,lTo)).forEach(i=>{
+    moves.push({date:i.date, created_at:i.created_at, kind:'وارد نقدي ('+i.company+')', archiveNo:'', amount:i.amount, dir:1});
+  });
+  state.expenses.filter(x=>x.branch===branch && x.box===box && inRange(x.date,lFrom,lTo)).forEach(x=>{
+    moves.push({date:x.date, created_at:x.created_at, kind:'مصروف ('+x.code+')', archiveNo:x.archiveNo, amount:x.amount, dir:-1});
+  });
+  state.custody.filter(c=>c.branch===branch && inRange(c.date,lFrom,lTo)).forEach(c=>{
+    if((c.box||'نقدي')===box) moves.push({date:c.date, created_at:c.created_at, kind:'تسليم عهدة (خارج)', archiveNo:c.archiveNo, amount:c.amount, dir:-1});
+    if(box==='عهدة') moves.push({date:c.date, created_at:c.created_at, kind:'استلام عهدة (داخل)', archiveNo:c.archiveNo, amount:c.amount, dir:1});
+  });
+  state.transfers.filter(t=>t.branch===branch && inRange(t.date,lFrom,lTo)).forEach(t=>{
+    if(t.fromBox===box) moves.push({date:t.date, created_at:t.created_at, kind:'مناقلة صادرة → '+t.toBox, archiveNo:t.archiveNo, amount:t.amount, dir:-1});
+    if(t.toBox===box) moves.push({date:t.date, created_at:t.created_at, kind:'مناقلة واردة ← '+t.fromBox, archiveNo:t.archiveNo, amount:t.amount, dir:1});
+  });
+
+  moves.sort((a,z)=> a.date===z.date ? (a.created_at||'').localeCompare(z.created_at||'') : a.date.localeCompare(z.date));
+
+  if(moves.length===0){ el.innerHTML = '<div class="empty">ما فيه حركات بهذي الفترة لهذا الصندوق</div>'; return; }
+
+  let running = 0;
+  const rowsHtml = moves.map(m=>{
+    running += m.dir * m.amount;
+    return `
+      <div class="list-item">
+        <div>
+          <div style="font-size:12px; color:#475569; font-weight:600;">${m.kind}</div>
+          <div style="font-size:11px;color:#94A3B8; margin-top:2px;">${m.date}${m.archiveNo?' · '+m.archiveNo:''}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-weight:700; color:${m.dir>0?'#15803D':'#DC2626'};">${m.dir>0?'+':'-'}${money(m.amount)}</span>
+          <span style="font-size:11px; color:#64748B; min-width:70px; text-align:left;">الرصيد: ${money(running)}</span>
+        </div>
+      </div>`;
+  }).join('');
+  el.innerHTML = `<p class="note">عدد الحركات: ${moves.length} · الرصيد النهائي: <b>${money(running)}</b></p>` + rowsHtml;
 }
 
 /* ==================== نسخة احتياطية ==================== */
@@ -1072,6 +1290,7 @@ function initAppOnce(){
   renderNetwork();
   renderCustody();
   renderCashClose();
+  renderTransfers();
   renderEmployeesTab();
 }
 </script>
