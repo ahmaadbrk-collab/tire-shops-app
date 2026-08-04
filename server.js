@@ -12,7 +12,9 @@ const SESSION_SECRET = process.env.SESSION_SECRET || "change-this-secret-please"
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data.json");
 
-const EMPTY_DB = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [] };
+const EMPTY_DB = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], counters: {} };
+
+const BRANCH_CODES = { "فخامة الاطار": "FAK", "روائع الافق": "RAF", "روعة المنار": "RMN" };
 
 function loadDB() {
   try {
@@ -22,7 +24,7 @@ function loadDB() {
     }
     const raw = fs.readFileSync(DB_PATH, "utf8");
     const parsed = JSON.parse(raw);
-    return { ...EMPTY_DB, ...parsed };
+    return { ...EMPTY_DB, ...parsed, counters: parsed.counters || {} };
   } catch (e) {
     console.error("DB load error, starting fresh:", e.message);
     return { ...EMPTY_DB };
@@ -37,6 +39,13 @@ function saveDB(db) {
 }
 
 let db = loadDB();
+
+function nextArchiveNo(prefix, branch) {
+  const code = BRANCH_CODES[branch] || "GEN";
+  const key = `${prefix}-${code}`;
+  db.counters[key] = (db.counters[key] || 0) + 1;
+  return `${key}-${String(db.counters[key]).padStart(3, "0")}`;
+}
 
 const app = express();
 app.use(express.json());
@@ -81,19 +90,22 @@ app.get("/api/data", requireAuth, (req, res) => {
   res.json(db);
 });
 
-function makeCollectionRoutes(name, fields, numericFields, routeName) {
+function makeCollectionRoutes(name, fields, numericFields, routeName, booleanFields, archivePrefix) {
   numericFields = numericFields || [];
+  booleanFields = booleanFields || [];
   const route = routeName || name;
   app.post(`/api/${route}`, requireAuth, (req, res) => {
     const b = req.body || {};
     const record = { id: genId(), created_at: new Date().toISOString() };
     fields.forEach((f) => {
       if (numericFields.includes(f)) record[f] = Number(b[f]) || 0;
+      else if (booleanFields.includes(f)) record[f] = !!b[f];
       else record[f] = b[f] !== undefined && b[f] !== null ? b[f] : "";
     });
+    if (archivePrefix) record.archiveNo = nextArchiveNo(archivePrefix, b.branch);
     db[name].unshift(record);
     saveDB(db);
-    res.json({ id: record.id });
+    res.json({ id: record.id, archiveNo: record.archiveNo });
   });
   app.delete(`/api/${route}/:id`, requireAuth, (req, res) => {
     db[name] = db[name].filter((r) => r.id !== req.params.id);
@@ -102,13 +114,30 @@ function makeCollectionRoutes(name, fields, numericFields, routeName) {
   });
 }
 
-makeCollectionRoutes("sales", ["date", "branch", "type", "box", "gross", "rate", "net", "notes"], ["gross", "rate", "net"]);
-makeCollectionRoutes("expenses", ["date", "branch", "code", "box", "amount", "employee", "notes"], ["amount"]);
+makeCollectionRoutes("sales", ["date", "branch", "type", "box", "gross", "rate", "net", "notes"], ["gross", "rate", "net"], null, null, "SAL");
+makeCollectionRoutes("expenses", ["date", "branch", "code", "box", "amount", "employee", "invoiceNo", "supplier", "notes"], ["amount"], null, null, "EXP");
 makeCollectionRoutes("income", ["date", "branch", "company", "box", "amount", "notes"], ["amount"]);
-makeCollectionRoutes("employees", ["name"], []);
-makeCollectionRoutes("custody", ["date", "branch", "amount", "collector", "notes"], ["amount"]);
-makeCollectionRoutes("network", ["date", "branch", "pos_statement", "bank_deposit", "notes"], ["pos_statement", "bank_deposit"]);
-makeCollectionRoutes("cashClose", ["date", "branch", "actual_cash", "notes"], ["actual_cash"], "cash-close");
+makeCollectionRoutes("employees", ["name", "branch"], []);
+makeCollectionRoutes("custody", ["date", "branch", "box", "amount", "collector", "notes"], ["amount"], "custody", ["forwarded"], "CUS");
+makeCollectionRoutes("network", ["date", "branch", "bank_deposit", "notes"], ["bank_deposit"]);
+makeCollectionRoutes("cashClose", ["date", "branch", "actual_cash", "notes"], ["actual_cash"], "cash-close", ["closed"]);
+makeCollectionRoutes("transfers", ["date", "branch", "fromBox", "toBox", "amount", "notes"], ["amount"], "transfers", null, "TRF");
+
+/* ---------- تبديل حالة (رحّل / أُقفل) ---------- */
+app.patch("/api/custody/:id/forwarded", requireAuth, (req, res) => {
+  const rec = db.custody.find((r) => r.id === req.params.id);
+  if (!rec) return res.status(404).json({ error: "not found" });
+  rec.forwarded = !rec.forwarded;
+  saveDB(db);
+  res.json({ forwarded: rec.forwarded });
+});
+app.patch("/api/cash-close/:id/closed", requireAuth, (req, res) => {
+  const rec = db.cashClose.find((r) => r.id === req.params.id);
+  if (!rec) return res.status(404).json({ error: "not found" });
+  rec.closed = !rec.closed;
+  saveDB(db);
+  res.json({ closed: rec.closed });
+});
 
 /* ---------- نسخة احتياطية ---------- */
 app.get("/api/backup", requireAuth, (req, res) => {
