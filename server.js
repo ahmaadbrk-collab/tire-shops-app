@@ -12,33 +12,105 @@ const SESSION_SECRET = process.env.SESSION_SECRET || "change-this-secret-please"
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data.json");
 
+// إعدادات التخزين الدائم على GitHub (اختياري لكن يُنصح به بشدة على Render)
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
+const GITHUB_REPO = process.env.GITHUB_REPO || ""; // مثال: ahmaadbrk-collab/tire-shops-app
+const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
+const GITHUB_DATA_PATH = process.env.GITHUB_DATA_PATH || "data.json";
+const GITHUB_ENABLED = !!(GITHUB_TOKEN && GITHUB_REPO);
+
 const EMPTY_DB = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], counters: {} };
 
 const BRANCH_CODES = { "فخامة الاطار": "FAK", "روائع الافق": "RAF", "روعة المنار": "RMN" };
 
-function loadDB() {
+let db = { ...EMPTY_DB };
+let githubSha = null; // نحتاجه لتحديث الملف بـ GitHub API
+
+/* ============ تخزين GitHub (دائم) ============ */
+async function githubGetFile() {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_PATH}?ref=${GITHUB_BRANCH}`;
+  const r = await fetch(url, {
+    headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: "application/vnd.github+json" },
+  });
+  if (r.status === 404) return null; // الملف ما موجود بعد
+  if (!r.ok) throw new Error(`GitHub GET failed: ${r.status} ${await r.text()}`);
+  const json = await r.json();
+  githubSha = json.sha;
+  const content = Buffer.from(json.content, "base64").toString("utf8");
+  return JSON.parse(content);
+}
+
+async function githubPutFile(dataObj) {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_PATH}`;
+  const content = Buffer.from(JSON.stringify(dataObj, null, 2), "utf8").toString("base64");
+  const body = {
+    message: `تحديث بيانات النظام - ${new Date().toISOString()}`,
+    content,
+    branch: GITHUB_BRANCH,
+  };
+  if (githubSha) body.sha = githubSha;
+  const r = await fetch(url, {
+    method: "PUT",
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`GitHub PUT failed: ${r.status} ${await r.text()}`);
+  const json = await r.json();
+  githubSha = json.content.sha; // نحدّث الـ sha لآخر نسخة حتى تنجح التحديثات الجايه
+}
+
+/* ============ تخزين محلي (احتياطي عند عدم توفر GitHub) ============ */
+function localLoad() {
   try {
-    if (!fs.existsSync(DB_PATH)) {
-      fs.writeFileSync(DB_PATH, JSON.stringify(EMPTY_DB, null, 2));
-      return { ...EMPTY_DB };
-    }
-    const raw = fs.readFileSync(DB_PATH, "utf8");
-    const parsed = JSON.parse(raw);
-    return { ...EMPTY_DB, ...parsed, counters: parsed.counters || {} };
+    if (!fs.existsSync(DB_PATH)) return { ...EMPTY_DB };
+    return JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
   } catch (e) {
-    console.error("DB load error, starting fresh:", e.message);
+    console.error("Local DB load error:", e.message);
     return { ...EMPTY_DB };
   }
 }
-
-function saveDB(db) {
-  // كتابة آمنة: نكتب لملف مؤقت ثم نستبدل، لتفادي تلف البيانات لو انقطع التشغيل أثناء الكتابة
+function localSave(dataObj) {
   const tmp = DB_PATH + ".tmp";
-  fs.writeFileSync(tmp, JSON.stringify(db, null, 2));
+  fs.writeFileSync(tmp, JSON.stringify(dataObj, null, 2));
   fs.renameSync(tmp, DB_PATH);
 }
 
-let db = loadDB();
+async function loadDB() {
+  if (GITHUB_ENABLED) {
+    try {
+      const remote = await githubGetFile();
+      if (remote) {
+        console.log("✅ تم تحميل البيانات من GitHub (تخزين دائم)");
+        return { ...EMPTY_DB, ...remote, counters: remote.counters || {} };
+      }
+      console.log("ℹ️ لا يوجد ملف بيانات على GitHub بعد، سيبدأ ملف جديد.");
+      return { ...EMPTY_DB };
+    } catch (e) {
+      console.error("⚠️ فشل تحميل البيانات من GitHub:", e.message, "— سيتم استخدام نسخة محلية إن وجدت.");
+      return localLoad();
+    }
+  }
+  console.warn("⚠️ تحذير: GITHUB_TOKEN أو GITHUB_REPO غير مُعرّفين. البيانات ستُخزَّن محلياً فقط وقد تُمسح عند إعادة النشر!");
+  return localLoad();
+}
+
+// طابور حفظ متسلسل لتفادي تعارض الكتابة المتزامنة
+let saveQueue = Promise.resolve();
+function saveDB(dataObj) {
+  saveQueue = saveQueue
+    .then(async () => {
+      localSave(dataObj); // نسخة محلية سريعة دايماً (احتياط إضافي)
+      if (GITHUB_ENABLED) {
+        await githubPutFile(dataObj);
+      }
+    })
+    .catch((e) => console.error("⚠️ فشل حفظ البيانات:", e.message));
+  return saveQueue;
+}
 
 function nextArchiveNo(prefix, branch) {
   const code = BRANCH_CODES[branch] || "GEN";
@@ -82,7 +154,7 @@ app.post("/api/logout", (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 app.get("/api/me", (req, res) => {
-  res.json({ loggedIn: !!(req.session && req.session.loggedIn) });
+  res.json({ loggedIn: !!(req.session && req.session.loggedIn), storage: GITHUB_ENABLED ? "github" : "local" });
 });
 
 /* ---------- بيانات ---------- */
@@ -94,7 +166,7 @@ function makeCollectionRoutes(name, fields, numericFields, routeName, booleanFie
   numericFields = numericFields || [];
   booleanFields = booleanFields || [];
   const route = routeName || name;
-  app.post(`/api/${route}`, requireAuth, (req, res) => {
+  app.post(`/api/${route}`, requireAuth, async (req, res) => {
     const b = req.body || {};
     const record = { id: genId(), created_at: new Date().toISOString() };
     fields.forEach((f) => {
@@ -104,12 +176,20 @@ function makeCollectionRoutes(name, fields, numericFields, routeName, booleanFie
     });
     if (archivePrefix) record.archiveNo = nextArchiveNo(archivePrefix, b.branch);
     db[name].unshift(record);
-    saveDB(db);
+    try {
+      await saveDB(db);
+    } catch (e) {
+      return res.status(500).json({ error: "save failed" });
+    }
     res.json({ id: record.id, archiveNo: record.archiveNo });
   });
-  app.delete(`/api/${route}/:id`, requireAuth, (req, res) => {
+  app.delete(`/api/${route}/:id`, requireAuth, async (req, res) => {
     db[name] = db[name].filter((r) => r.id !== req.params.id);
-    saveDB(db);
+    try {
+      await saveDB(db);
+    } catch (e) {
+      return res.status(500).json({ error: "save failed" });
+    }
     res.json({ ok: true });
   });
 }
@@ -124,18 +204,18 @@ makeCollectionRoutes("cashClose", ["date", "branch", "actual_cash", "notes"], ["
 makeCollectionRoutes("transfers", ["date", "branch", "fromBox", "toBox", "amount", "notes"], ["amount"], "transfers", null, "TRF");
 
 /* ---------- تبديل حالة (رحّل / أُقفل) ---------- */
-app.patch("/api/custody/:id/forwarded", requireAuth, (req, res) => {
+app.patch("/api/custody/:id/forwarded", requireAuth, async (req, res) => {
   const rec = db.custody.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   rec.forwarded = !rec.forwarded;
-  saveDB(db);
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ forwarded: rec.forwarded });
 });
-app.patch("/api/cash-close/:id/closed", requireAuth, (req, res) => {
+app.patch("/api/cash-close/:id/closed", requireAuth, async (req, res) => {
   const rec = db.cashClose.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   rec.closed = !rec.closed;
-  saveDB(db);
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ closed: rec.closed });
 });
 
@@ -150,6 +230,10 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+loadDB().then((loaded) => {
+  db = loaded;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(GITHUB_ENABLED ? "🔒 التخزين الدائم على GitHub مفعّل." : "⚠️ التخزين محلي فقط (غير دائم على Render المجاني).");
+  });
 });
