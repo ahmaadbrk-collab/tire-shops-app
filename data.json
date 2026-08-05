@@ -183,7 +183,16 @@
       "forwarded": false
     }
   ],
-  "network": [],
+  "network": [
+    {
+      "id": "msgf8bgpglij0q1",
+      "created_at": "2026-08-05T18:29:16.681Z",
+      "date": "2026-08-05",
+      "branch": "فخامة الاطار",
+      "bank_deposit": 1000,
+      "notes": ""
+    }
+  ],
   "cashClose": [],
   "transfers": [
     {
