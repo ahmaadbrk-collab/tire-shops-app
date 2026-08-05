@@ -156,11 +156,24 @@
   ],
   "network": [],
   "cashClose": [],
-  "transfers": [],
+  "transfers": [
+    {
+      "id": "msgf14apdbxi9fc",
+      "created_at": "2026-08-05T18:23:40.801Z",
+      "date": "2026-08-05",
+      "branch": "فخامة الاطار",
+      "fromBox": "نقدي",
+      "toBox": "عهدة",
+      "amount": 3000,
+      "notes": "",
+      "archiveNo": "TRF-FAK-001"
+    }
+  ],
   "counters": {
     "CUS-RMN": 1,
     "SAL-GEN": 1,
     "SAL-RAF": 1,
-    "SAL-RMN": 1
+    "SAL-RMN": 1,
+    "TRF-FAK": 1
   }
 }
