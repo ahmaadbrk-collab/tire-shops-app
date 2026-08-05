@@ -1,19 +1,6 @@
 {
   "sales": [
     {
-      "id": "msgezgvyd18d7p0",
-      "created_at": "2026-08-05T18:22:23.806Z",
-      "date": "2026-08-05",
-      "branch": "روعة المنار",
-      "type": "اوتبيا",
-      "box": "بنك",
-      "gross": 600,
-      "rate": 0,
-      "net": 600,
-      "notes": "",
-      "archiveNo": "SAL-RMN-001"
-    },
-    {
       "id": "msgex5s39wqobiz",
       "created_at": "2026-08-05T18:20:36.099Z",
       "date": "2026-08-05",
