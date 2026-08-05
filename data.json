@@ -40,7 +40,22 @@
       "archiveNo": "SAL-GEN-001"
     }
   ],
-  "expenses": [],
+  "expenses": [
+    {
+      "id": "msgf1lk8jw7vc4d",
+      "created_at": "2026-08-05T18:24:03.176Z",
+      "date": "2026-08-05",
+      "branch": "فخامة الاطار",
+      "code": "تغذية",
+      "box": "عهدة",
+      "amount": 10,
+      "employee": "",
+      "invoiceNo": "",
+      "supplier": "",
+      "notes": "",
+      "archiveNo": "EXP-FAK-001"
+    }
+  ],
   "income": [],
   "employees": [
     {
@@ -174,6 +189,7 @@
     "SAL-GEN": 1,
     "SAL-RAF": 1,
     "SAL-RMN": 1,
-    "TRF-FAK": 1
+    "TRF-FAK": 1,
+    "EXP-FAK": 1
   }
 }
