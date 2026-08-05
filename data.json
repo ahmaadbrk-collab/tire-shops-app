@@ -110,7 +110,8 @@
       "amount": 380,
       "collector": "حسين الوهاشي",
       "notes": "استلام صافي عهدة المبيعات النقدية في تاريخ 5/8/2026",
-      "archiveNo": "CUS-RMN-001"
+      "archiveNo": "CUS-RMN-001",
+      "forwarded": true
     }
   ],
   "network": [],
