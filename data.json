@@ -1,5 +1,19 @@
 {
-  "sales": [],
+  "sales": [
+    {
+      "id": "msgewmdx9q8vdeq",
+      "created_at": "2026-08-05T18:20:10.965Z",
+      "date": "2026-08-05",
+      "branch": "",
+      "type": "كاش",
+      "box": "نقدي",
+      "gross": 1000,
+      "rate": 0,
+      "net": 1000,
+      "notes": "",
+      "archiveNo": "SAL-GEN-001"
+    }
+  ],
   "expenses": [],
   "income": [],
   "employees": [
@@ -118,6 +132,7 @@
   "cashClose": [],
   "transfers": [],
   "counters": {
-    "CUS-RMN": 1
+    "CUS-RMN": 1,
+    "SAL-GEN": 1
   }
 }
