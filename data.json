@@ -1,19 +1,6 @@
 {
   "sales": [
     {
-      "id": "msgex5s39wqobiz",
-      "created_at": "2026-08-05T18:20:36.099Z",
-      "date": "2026-08-05",
-      "branch": "روائع الافق",
-      "type": "شبكة",
-      "box": "بنك",
-      "gross": 600,
-      "rate": 0,
-      "net": 600,
-      "notes": "",
-      "archiveNo": "SAL-RAF-001"
-    },
-    {
       "id": "msgewmdx9q8vdeq",
       "created_at": "2026-08-05T18:20:10.965Z",
       "date": "2026-08-05",
