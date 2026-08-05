@@ -100,20 +100,7 @@
       "branch": "فخامة الاطار"
     }
   ],
-  "custody": [
-    {
-      "id": "msgethnmnhg3r8q",
-      "created_at": "2026-08-05T18:17:44.866Z",
-      "date": "2026-08-05",
-      "branch": "روعة المنار",
-      "box": "عهدة",
-      "amount": 380,
-      "collector": "حسين الوهاشي",
-      "notes": "استلام صافي عهدة المبيعات النقدية في تاريخ 5/8/2026",
-      "archiveNo": "CUS-RMN-001",
-      "forwarded": false
-    }
-  ],
+  "custody": [],
   "network": [],
   "cashClose": [],
   "transfers": [
