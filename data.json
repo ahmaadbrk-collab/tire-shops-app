@@ -311,7 +311,19 @@
       "branch": "فخامة الاطار"
     }
   ],
-  "custody": [],
+  "custody": [
+    {
+      "id": "msj2q0mx8agb5cw",
+      "created_at": "2026-08-07T15:02:25.977Z",
+      "date": "2026-08-07",
+      "branch": "فخامة الاطار",
+      "box": "نقدي",
+      "amount": 4841,
+      "collector": "حسين الوهاشي",
+      "notes": "اجمالي العهد  المحصلة الى تاريخ 7/8/2026 ",
+      "archiveNo": "CUS-FAK-001"
+    }
+  ],
   "network": [],
   "cashClose": [],
   "transfers": [],
@@ -323,6 +335,7 @@
     "TRF-FAK": 1,
     "EXP-FAK": 1,
     "EXP-RMN": 1,
-    "SAL-FAK": 24
+    "SAL-FAK": 24,
+    "CUS-FAK": 1
   }
 }
