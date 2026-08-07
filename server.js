@@ -1,6 +1,6 @@
 const express = require("express");
-const session = require("express-session");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const path = require("path");
 const fs = require("fs");
 
@@ -121,19 +121,42 @@ function nextArchiveNo(prefix, branch) {
 
 const app = express();
 app.use(express.json());
-app.use(
-  session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 30 }, // شهر
-  })
-);
 
 const PASS_HASH = bcrypt.hashSync(APP_PASS, 10);
+const AUTH_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30; // شهر
+
+function sign(payload) {
+  return crypto.createHmac("sha256", SESSION_SECRET).update(payload).digest("hex");
+}
+function makeAuthCookie() {
+  const expires = Date.now() + AUTH_MAX_AGE_MS;
+  const payload = `${APP_USER}.${expires}`;
+  return `${payload}.${sign(payload)}`;
+}
+function parseCookies(header) {
+  const out = {};
+  (header || "").split(";").forEach((part) => {
+    const idx = part.indexOf("=");
+    if (idx === -1) return;
+    out[part.slice(0, idx).trim()] = decodeURIComponent(part.slice(idx + 1).trim());
+  });
+  return out;
+}
+function isValidAuthCookie(value) {
+  if (!value) return false;
+  const parts = value.split(".");
+  if (parts.length !== 3) return false;
+  const [user, expiresStr, sig] = parts;
+  const payload = `${user}.${expiresStr}`;
+  if (sign(payload) !== sig) return false;
+  if (user !== APP_USER) return false;
+  if (Date.now() > Number(expiresStr)) return false;
+  return true;
+}
 
 function requireAuth(req, res, next) {
-  if (req.session && req.session.loggedIn) return next();
+  const cookies = parseCookies(req.headers.cookie);
+  if (isValidAuthCookie(cookies.auth)) return next();
   return res.status(401).json({ error: "unauthorized" });
 }
 
@@ -142,19 +165,27 @@ function genId() {
 }
 
 /* ---------- تسجيل الدخول ---------- */
+// نظام تسجيل الدخول يعتمد على كوكيز موقّعة (HMAC) لا على ذاكرة السيرفر،
+// فيصمد حتى لو السيرفر توقف مؤقتاً وشغّل نفسه من جديد (شائع بالخطط المجانية).
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
   if (username === APP_USER && bcrypt.compareSync(password || "", PASS_HASH)) {
-    req.session.loggedIn = true;
+    const cookieVal = makeAuthCookie();
+    res.setHeader(
+      "Set-Cookie",
+      `auth=${encodeURIComponent(cookieVal)}; Max-Age=${Math.floor(AUTH_MAX_AGE_MS / 1000)}; Path=/; HttpOnly; SameSite=Lax`
+    );
     return res.json({ ok: true });
   }
   return res.status(401).json({ error: "بيانات الدخول غير صحيحة" });
 });
 app.post("/api/logout", (req, res) => {
-  req.session.destroy(() => res.json({ ok: true }));
+  res.setHeader("Set-Cookie", "auth=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax");
+  res.json({ ok: true });
 });
 app.get("/api/me", (req, res) => {
-  res.json({ loggedIn: !!(req.session && req.session.loggedIn), storage: GITHUB_ENABLED ? "github" : "local" });
+  const cookies = parseCookies(req.headers.cookie);
+  res.json({ loggedIn: isValidAuthCookie(cookies.auth), storage: GITHUB_ENABLED ? "github" : "local" });
 });
 
 /* ---------- بيانات ---------- */
