@@ -1,6 +1,20 @@
 {
   "sales": [
     {
+      "id": "msj2en6tsi9j7qk",
+      "created_at": "2026-08-07T14:53:35.333Z",
+      "date": "2026-08-07",
+      "branch": "فخامة الاطار",
+      "type": "مناقلة",
+      "box": "",
+      "gross": 713,
+      "rate": 0,
+      "net": 713,
+      "otherBranch": "روائع الافق",
+      "notes": "",
+      "archiveNo": "SAL-FAK-013"
+    },
+    {
       "id": "msj2dyggvth7oil",
       "created_at": "2026-08-07T14:53:03.280Z",
       "date": "2026-08-07",
@@ -155,6 +169,6 @@
     "TRF-FAK": 1,
     "EXP-FAK": 1,
     "EXP-RMN": 1,
-    "SAL-FAK": 12
+    "SAL-FAK": 13
   }
 }
