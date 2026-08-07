@@ -1,5 +1,20 @@
 {
-  "sales": [],
+  "sales": [
+    {
+      "id": "msj2dhjooofta29",
+      "created_at": "2026-08-07T14:52:41.364Z",
+      "date": "2026-08-07",
+      "branch": "فخامة الاطار",
+      "type": "شبكة",
+      "box": "بنك",
+      "gross": 1240,
+      "rate": 0,
+      "net": 1240,
+      "otherBranch": "",
+      "notes": "",
+      "archiveNo": "SAL-FAK-010"
+    }
+  ],
   "expenses": [],
   "income": [],
   "employees": [
@@ -112,6 +127,6 @@
     "TRF-FAK": 1,
     "EXP-FAK": 1,
     "EXP-RMN": 1,
-    "SAL-FAK": 9
+    "SAL-FAK": 10
   }
 }
