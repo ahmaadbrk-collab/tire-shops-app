@@ -1,6 +1,20 @@
 {
   "sales": [
     {
+      "id": "msj2fv04nm1ywif",
+      "created_at": "2026-08-07T14:54:32.116Z",
+      "date": "2026-08-07",
+      "branch": "فخامة الاطار",
+      "type": "كاش",
+      "box": "نقدي",
+      "gross": 1500,
+      "rate": 0,
+      "net": 1500,
+      "otherBranch": "",
+      "notes": "",
+      "archiveNo": "SAL-FAK-015"
+    },
+    {
       "id": "msj2f5ykp5ymmes",
       "created_at": "2026-08-07T14:53:59.660Z",
       "date": "2026-08-07",
@@ -183,6 +197,6 @@
     "TRF-FAK": 1,
     "EXP-FAK": 1,
     "EXP-RMN": 1,
-    "SAL-FAK": 14
+    "SAL-FAK": 15
   }
 }
