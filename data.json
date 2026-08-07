@@ -1,6 +1,19 @@
 {
   "sales": [
     {
+      "id": "msj0oack1uond2x",
+      "created_at": "2026-08-07T14:05:06.020Z",
+      "date": "2026-08-07",
+      "branch": "فخامة الاطار",
+      "type": "شبكة",
+      "box": "بنك",
+      "gross": 660,
+      "rate": 0,
+      "net": 660,
+      "notes": "",
+      "archiveNo": "SAL-FAK-008"
+    },
+    {
       "id": "msj0n4omehunl4s",
       "created_at": "2026-08-07T14:04:12.022Z",
       "date": "2026-08-07",
@@ -139,6 +152,6 @@
     "TRF-FAK": 1,
     "EXP-FAK": 1,
     "EXP-RMN": 1,
-    "SAL-FAK": 7
+    "SAL-FAK": 8
   }
 }
