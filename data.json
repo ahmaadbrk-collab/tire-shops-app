@@ -1,6 +1,20 @@
 {
   "sales": [
     {
+      "id": "msj2jv2bfkhlefb",
+      "created_at": "2026-08-07T14:57:38.819Z",
+      "date": "2026-08-07",
+      "branch": "فخامة الاطار",
+      "type": "آجل",
+      "box": "بنك",
+      "gross": 330,
+      "rate": 0,
+      "net": 330,
+      "otherBranch": "",
+      "notes": "",
+      "archiveNo": "SAL-FAK-020"
+    },
+    {
       "id": "msj2j6go2s3g1p5",
       "created_at": "2026-08-07T14:57:06.936Z",
       "date": "2026-08-07",
@@ -253,6 +267,6 @@
     "TRF-FAK": 1,
     "EXP-FAK": 1,
     "EXP-RMN": 1,
-    "SAL-FAK": 19
+    "SAL-FAK": 20
   }
 }
