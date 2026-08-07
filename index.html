@@ -106,7 +106,10 @@
       <label class="field"><span>نوع البيع *</span>
         <select id="s-type"><option value="">اختر نوع البيع</option></select>
       </label>
-      <label class="field"><span>الصندوق *</span>
+      <label class="field" id="s-other-branch-wrap" style="display:none;"><span>الفرع المقابل (استلم البضاعة) *</span>
+        <select id="s-other-branch"><option value="">اختر الفرع</option></select>
+      </label>
+      <label class="field" id="s-box-wrap"><span>الصندوق *</span>
         <select id="s-box" disabled><option value="">اختر الصندوق أولاً</option></select>
       </label>
       <p class="hint" id="s-hint" style="display:none;">⚠ لازم تحدد الصندوق قبل ما تكتب المبلغ</p>
@@ -315,6 +318,7 @@
       <button class="chip" data-view="statement">كشف حساب (دفع آجل)</button>
       <button class="chip" data-view="network">تسوية الشبكة</button>
       <button class="chip" data-view="custody">العهدة</button>
+      <button class="chip" data-view="branchTransfers">مناقلات الفروع</button>
     </div>
 
     <div id="d-view-daily" class="dview">
@@ -371,6 +375,16 @@
         <div id="d-custody-list"></div>
       </div>
     </div>
+    <div id="d-view-branchTransfers" class="dview" style="display:none;">
+      <div class="card">
+        <h3>🔄 كل عمليات مناقلة البضاعة بين الفروع</h3>
+        <div id="d-btr-list"></div>
+      </div>
+      <div class="card">
+        <h3>⚖️ صافي الرصيد بين كل فرعين</h3>
+        <div id="d-btr-net"></div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -390,8 +404,9 @@
 <script>
 /* ==================== ثوابت ==================== */
 const BRANCHES = ["فخامة الاطار", "روائع الافق", "روعة المنار"];
-const SALE_TYPES = ["كاش", "آجل", "شبكة", "حوالة", "اوتبيا", "كار ستيشن", "تابي", "تمارا"];
+const SALE_TYPES = ["كاش", "آجل", "شبكة", "حوالة", "اوتبيا", "كار ستيشن", "تابي", "تمارا", "مناقلة"];
 const BNPL_TYPES = ["اوتبيا", "كار ستيشن", "تابي", "تمارا"];
+const NON_BOX_TYPES = [...BNPL_TYPES, "مناقلة"]; // أنواع ما تدخل صندوق مباشرة وقت التسجيل
 const BOX_TYPES = ["نقدي", "بنك", "عهدة"];
 const EXPENSE_CODES = ["تغذية", "وقود", "عمولة سائق", "صيانة", "قرطاسية", "كهرباء", "اتصالات", "نظافة", "سلفة موظف", "فاتورة مشتريات", "متفرقات"];
 const LS_KEYS = { sales:"tire-local-sales", expenses:"tire-local-expenses", income:"tire-local-income", employees:"tire-local-employees" };
@@ -519,23 +534,32 @@ const sNetValue = document.getElementById('s-net-value');
 const sAmountLabel = document.getElementById('s-amount-label');
 
 function isBnpl(type){ return BNPL_TYPES.includes(type); }
+function isTransfer(type){ return type === 'مناقلة'; }
 
 function updateSalesForm(){
   const type = sType.value;
-  if(type){
+  const branch = document.getElementById('s-branch').value;
+  document.getElementById('s-box-wrap').style.display = isTransfer(type) ? 'none' : 'block';
+  document.getElementById('s-other-branch-wrap').style.display = isTransfer(type) ? 'block' : 'none';
+  if(isTransfer(type)){
+    const others = BRANCHES.filter(b=>b!==branch);
+    fillSelect(document.getElementById('s-other-branch'), others, 'اختر الفرع');
+    sBox.value = ''; sBox.disabled = true;
+  } else if(type){
     fillSelect(sBox, BOX_TYPES, 'اختر الصندوق أولاً');
     sBox.disabled = false;
   } else {
     sBox.disabled = true; sBox.value = '';
   }
   sRateWrap.style.display = isBnpl(type) ? 'block' : 'none';
-  sAmountLabel.textContent = isBnpl(type) ? 'المبلغ الإجمالي (قبل العمولة) *' : 'المبلغ *';
+  sAmountLabel.textContent = isBnpl(type) ? 'المبلغ الإجمالي (قبل العمولة) *' : (isTransfer(type) ? 'قيمة البضاعة المنقولة *' : 'المبلغ *');
   updateSalesGrossState();
 }
 function updateSalesGrossState(){
-  const boxed = !!sBox.value;
+  const type = sType.value;
+  const boxed = isTransfer(type) ? true : !!sBox.value;
   sGross.disabled = !boxed;
-  sHint.style.display = (sType.value && !boxed) ? 'flex' : 'none';
+  sHint.style.display = (type && !isTransfer(type) && !sBox.value) ? 'flex' : 'none';
   updateNetPreview();
   updateSalesSubmitState();
 }
@@ -552,10 +576,14 @@ function updateNetPreview(){
   }
 }
 function updateSalesSubmitState(){
-  const ok = document.getElementById('s-date').value && sType.value && sBox.value && sBox.value !== '' && sGross.value && parseFloat(sGross.value) > 0;
+  const type = sType.value;
+  const baseOk = document.getElementById('s-date').value && document.getElementById('s-branch').value && type && sGross.value && parseFloat(sGross.value) > 0;
+  const ok = isTransfer(type) ? (baseOk && document.getElementById('s-other-branch').value) : (baseOk && sBox.value);
   sSubmit.disabled = !ok;
 }
 sType.addEventListener('change', updateSalesForm);
+document.getElementById('s-branch').addEventListener('change', updateSalesForm);
+document.getElementById('s-other-branch').addEventListener('change', updateSalesSubmitState);
 sBox.addEventListener('change', updateSalesGrossState);
 sGross.addEventListener('input', ()=>{ updateNetPreview(); updateSalesSubmitState(); });
 sRate.addEventListener('input', updateNetPreview);
@@ -568,11 +596,12 @@ sSubmit.addEventListener('click', async ()=>{
   const net = Math.round(gross * (1 - rate/100) * 100)/100;
   sSubmit.disabled = true;
   try{
-    await apiPost('/api/sales', {
+    const r = await apiPost('/api/sales', {
       date: document.getElementById('s-date').value, branch: document.getElementById('s-branch').value,
-      type, box: sBox.value, gross, rate, net
+      type, box: isTransfer(type) ? '' : sBox.value, gross, rate, net,
+      otherBranch: isTransfer(type) ? document.getElementById('s-other-branch').value : ''
     });
-    toast('تمت إضافة عملية البيع');
+    toast('تمت إضافة العملية' + (r.archiveNo ? ' · '+r.archiveNo : ''));
     sGross.value=''; sRate.value=''; sType.value=''; updateSalesForm();
     await loadAllFromServer();
   }catch(e){ toast('تعذر الحفظ، تأكد من الاتصال'); }
@@ -588,10 +617,10 @@ function renderSales(){
       <div>
         <div>
           <span class="pill ${branchPillClass(s.branch)}">🏪 ${s.branch}</span>
-          <span class="pill pill-box">${s.box}</span>
+          ${s.type==='مناقلة' ? `<span style="font-size:11px; color:#7C3AED;">← ${s.otherBranch||''}</span>` : `<span class="pill pill-box">${s.box}</span>`}
           <span style="font-size:12px;color:#64748b;">${s.type}</span>
         </div>
-        <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${s.date}${s.rate>0 ? ' · عمولة '+s.rate+'%' : ''}</div>
+        <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${s.date}${s.rate>0 ? ' · عمولة '+s.rate+'%' : ''}${s.archiveNo?' · '+s.archiveNo:''}</div>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
         <span class="amount-pos">${money(s.net)}</span>
@@ -1182,6 +1211,40 @@ function renderDashboard(){
     cusEl.innerHTML = byBranch.map(r=>`
       <div class="box-row"><span class="pill ${branchPillClass(r.branch)}">🏪 ${r.branch}</span><span>${r.count} تسليم · <b>${money(r.total)}</b></span></div>
     `).join('');
+  }
+
+  // تقرير مناقلات البضاعة بين الفروع
+  const branchTransfers = state.sales.filter(s=>s.type==='مناقلة');
+  const btrListEl = document.getElementById('d-btr-list');
+  if(branchTransfers.length===0){ btrListEl.innerHTML = '<div class="empty">ما فيه مناقلات بضاعة مسجلة بعد</div>'; }
+  else {
+    btrListEl.innerHTML = branchTransfers.slice(0,50).map(s=>`
+      <div class="list-item">
+        <div>
+          <div><span class="pill ${branchPillClass(s.branch)}">🏪 ${s.branch}</span> → <span class="pill ${branchPillClass(s.otherBranch)}">🏪 ${s.otherBranch||'-'}</span></div>
+          <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${s.date}${s.archiveNo?' · '+s.archiveNo:''}${s.notes?' · '+s.notes:''}</div>
+        </div>
+        <span style="font-weight:700;">${money(s.net)}</span>
+      </div>
+    `).join('');
+  }
+  const btrNetEl = document.getElementById('d-btr-net');
+  const pairs = [];
+  for(let i=0;i<BRANCHES.length;i++){
+    for(let j=i+1;j<BRANCHES.length;j++){
+      const a = BRANCHES[i], b = BRANCHES[j];
+      const aToB = branchTransfers.filter(s=>s.branch===a && s.otherBranch===b).reduce((x,r)=>x+r.net,0);
+      const bToA = branchTransfers.filter(s=>s.branch===b && s.otherBranch===a).reduce((x,r)=>x+r.net,0);
+      const net = aToB - bToA;
+      if(aToB>0 || bToA>0) pairs.push({a, b, net});
+    }
+  }
+  if(pairs.length===0){ btrNetEl.innerHTML = '<div class="empty">لا يوجد رصيد بعد</div>'; }
+  else {
+    btrNetEl.innerHTML = pairs.map(p=>{
+      const owed = p.net>0 ? `${p.b} مدين لـ ${p.a}` : (p.net<0 ? `${p.a} مدين لـ ${p.b}` : 'متعادل');
+      return `<div class="box-row"><span>${p.a} ↔ ${p.b}</span><span style="font-weight:700;">${money(Math.abs(p.net))} <span style="font-weight:400; font-size:11px; color:#64748B;">(${owed})</span></span></div>`;
+    }).join('');
   }
 
   // دفتر الصندوق التفصيلي (كل حركة بالترتيب الزمني)
