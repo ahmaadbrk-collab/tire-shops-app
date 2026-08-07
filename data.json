@@ -1,5 +1,19 @@
 {
-  "sales": [],
+  "sales": [
+    {
+      "id": "msj0fwzs5e94dpe",
+      "created_at": "2026-08-07T13:58:35.464Z",
+      "date": "2026-08-07",
+      "branch": "فخامة الاطار",
+      "type": "كاش",
+      "box": "نقدي",
+      "gross": 100,
+      "rate": 0,
+      "net": 100,
+      "notes": "",
+      "archiveNo": "SAL-FAK-004"
+    }
+  ],
   "expenses": [],
   "income": [],
   "employees": [
@@ -112,6 +126,6 @@
     "TRF-FAK": 1,
     "EXP-FAK": 1,
     "EXP-RMN": 1,
-    "SAL-FAK": 3
+    "SAL-FAK": 4
   }
 }
