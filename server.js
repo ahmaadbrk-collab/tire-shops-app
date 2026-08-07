@@ -225,7 +225,7 @@ function makeCollectionRoutes(name, fields, numericFields, routeName, booleanFie
   });
 }
 
-makeCollectionRoutes("sales", ["date", "branch", "type", "box", "gross", "rate", "net", "notes"], ["gross", "rate", "net"], null, null, "SAL");
+makeCollectionRoutes("sales", ["date", "branch", "type", "box", "gross", "rate", "net", "otherBranch", "notes"], ["gross", "rate", "net"], null, null, "SAL");
 makeCollectionRoutes("expenses", ["date", "branch", "code", "box", "amount", "employee", "invoiceNo", "supplier", "notes"], ["amount"], null, null, "EXP");
 makeCollectionRoutes("income", ["date", "branch", "company", "box", "amount", "notes"], ["amount"]);
 makeCollectionRoutes("employees", ["name", "branch"], []);
