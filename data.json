@@ -1,19 +1,6 @@
 {
   "sales": [
     {
-      "id": "msj0n4omehunl4s",
-      "created_at": "2026-08-07T14:04:12.022Z",
-      "date": "2026-08-07",
-      "branch": "فخامة الاطار",
-      "type": "شبكة",
-      "box": "بنك",
-      "gross": 150,
-      "rate": 0,
-      "net": 150,
-      "notes": "",
-      "archiveNo": "SAL-FAK-006"
-    },
-    {
       "id": "msj0mj8qrkocwwv",
       "created_at": "2026-08-07T14:03:44.234Z",
       "date": "2026-08-07",
