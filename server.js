@@ -225,7 +225,7 @@ function makeCollectionRoutes(name, fields, numericFields, routeName, booleanFie
   });
 }
 
-makeCollectionRoutes("sales", ["date", "branch", "type", "box", "gross", "rate", "net", "otherBranch", "notes"], ["gross", "rate", "net"], null, null, "SAL");
+makeCollectionRoutes("sales", ["date", "branch", "type", "box", "gross", "rate", "net", "otherBranch", "itemName", "size", "receiverName", "price", "quantity", "transferred", "notes"], ["gross", "rate", "net", "price", "quantity"], null, ["transferred"], "SAL");
 makeCollectionRoutes("expenses", ["date", "branch", "code", "box", "amount", "employee", "invoiceNo", "supplier", "notes"], ["amount"], null, null, "EXP");
 makeCollectionRoutes("income", ["date", "branch", "company", "box", "amount", "notes"], ["amount"]);
 makeCollectionRoutes("employees", ["name", "branch"], []);
@@ -248,6 +248,13 @@ app.patch("/api/cash-close/:id/closed", requireAuth, async (req, res) => {
   rec.closed = !rec.closed;
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ closed: rec.closed });
+});
+app.patch("/api/sales/:id/transferred", requireAuth, async (req, res) => {
+  const rec = db.sales.find((r) => r.id === req.params.id);
+  if (!rec) return res.status(404).json({ error: "not found" });
+  rec.transferred = !rec.transferred;
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ transferred: rec.transferred });
 });
 
 /* ---------- نسخة احتياطية ---------- */
