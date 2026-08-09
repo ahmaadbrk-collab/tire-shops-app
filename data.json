@@ -1,6 +1,26 @@
 {
   "sales": [
     {
+      "id": "mslr6mhul0wgr30",
+      "created_at": "2026-08-09T12:02:43.938Z",
+      "date": "2026-08-09",
+      "branch": "روعة المنار",
+      "type": "شبكة",
+      "box": "بنك",
+      "gross": 160,
+      "rate": 0,
+      "net": 160,
+      "otherBranch": "",
+      "itemName": "",
+      "size": "",
+      "receiverName": "",
+      "price": 0,
+      "quantity": 0,
+      "transferred": false,
+      "notes": "",
+      "archiveNo": "SAL-RMN-002"
+    },
+    {
       "id": "mslqhrwtihbcfb8",
       "created_at": "2026-08-09T11:43:24.557Z",
       "date": "2026-08-09",
@@ -330,7 +350,7 @@
     "CUS-RMN": 1,
     "SAL-GEN": 1,
     "SAL-RAF": 5,
-    "SAL-RMN": 1,
+    "SAL-RMN": 2,
     "TRF-FAK": 1,
     "EXP-FAK": 3,
     "EXP-RMN": 1,
