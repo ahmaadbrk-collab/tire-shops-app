@@ -183,6 +183,20 @@
   ],
   "expenses": [
     {
+      "id": "mslqqbc5tbgqnoz",
+      "created_at": "2026-08-09T11:50:02.981Z",
+      "date": "2026-08-09",
+      "branch": "فخامة الاطار",
+      "code": "تغذية",
+      "box": "عهدة",
+      "amount": 25,
+      "employee": "",
+      "invoiceNo": "",
+      "supplier": "",
+      "notes": "نهلة  ضريبية ",
+      "archiveNo": "EXP-FAK-003"
+    },
+    {
       "id": "mslqpq53t6menpt",
       "created_at": "2026-08-09T11:49:35.511Z",
       "date": "2026-08-09",
@@ -306,7 +320,7 @@
     "SAL-RAF": 5,
     "SAL-RMN": 1,
     "TRF-FAK": 1,
-    "EXP-FAK": 2,
+    "EXP-FAK": 3,
     "EXP-RMN": 1,
     "SAL-FAK": 30,
     "CUS-FAK": 1
