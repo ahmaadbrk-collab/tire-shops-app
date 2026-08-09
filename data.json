@@ -1,6 +1,26 @@
 {
   "sales": [
     {
+      "id": "mslqg40jj3ngdu4",
+      "created_at": "2026-08-09T11:42:06.931Z",
+      "date": "2026-08-09",
+      "branch": "روائع الافق",
+      "type": "مناقلة",
+      "box": "",
+      "gross": 1860,
+      "rate": 0,
+      "net": 1860,
+      "otherBranch": "فخامة الاطار",
+      "itemName": "بردجستون",
+      "size": "275/75/17.5",
+      "receiverName": "حسين",
+      "price": 930,
+      "quantity": 2,
+      "transferred": false,
+      "notes": "",
+      "archiveNo": "SAL-RAF-004"
+    },
+    {
       "id": "mslqf508sgvp143",
       "created_at": "2026-08-09T11:41:21.560Z",
       "date": "2026-08-09",
@@ -248,7 +268,7 @@
   "counters": {
     "CUS-RMN": 1,
     "SAL-GEN": 1,
-    "SAL-RAF": 3,
+    "SAL-RAF": 4,
     "SAL-RMN": 1,
     "TRF-FAK": 1,
     "EXP-FAK": 1,
