@@ -1,6 +1,26 @@
 {
   "sales": [
     {
+      "id": "mslq68sm57t5q6u",
+      "created_at": "2026-08-09T11:34:26.566Z",
+      "date": "2026-08-09",
+      "branch": "فخامة الاطار",
+      "type": "اوتبيا",
+      "box": "بنك",
+      "gross": 705,
+      "rate": 9.2,
+      "net": 640.14,
+      "otherBranch": "",
+      "itemName": "",
+      "size": "",
+      "receiverName": "",
+      "price": 0,
+      "quantity": 0,
+      "transferred": false,
+      "notes": "",
+      "archiveNo": "SAL-FAK-029"
+    },
+    {
       "id": "mslq5nsqyvat858",
       "created_at": "2026-08-09T11:33:59.354Z",
       "date": "2026-08-09",
@@ -193,7 +213,7 @@
     "TRF-FAK": 1,
     "EXP-FAK": 1,
     "EXP-RMN": 1,
-    "SAL-FAK": 28,
+    "SAL-FAK": 29,
     "CUS-FAK": 1
   }
 }
