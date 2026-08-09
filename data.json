@@ -372,6 +372,17 @@
   ],
   "custody": [
     {
+      "id": "mslrd9154yjvjjh",
+      "created_at": "2026-08-09T12:07:53.081Z",
+      "date": "2026-08-09",
+      "branch": "روعة المنار",
+      "box": "عهدة",
+      "amount": 317.75,
+      "collector": "حسين الوهاشي",
+      "notes": "رصيد الا فتتاحي لعهدة حسين لى تاريخ 9/8/2026",
+      "archiveNo": "CUS-RMN-002"
+    },
+    {
       "id": "mslqsri5f3oxp1w",
       "created_at": "2026-08-09T11:51:57.245Z",
       "date": "2026-08-09",
@@ -387,7 +398,7 @@
   "cashClose": [],
   "transfers": [],
   "counters": {
-    "CUS-RMN": 1,
+    "CUS-RMN": 2,
     "SAL-GEN": 1,
     "SAL-RAF": 5,
     "SAL-RMN": 4,
