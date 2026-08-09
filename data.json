@@ -1,6 +1,26 @@
 {
   "sales": [
     {
+      "id": "mslqhrwtihbcfb8",
+      "created_at": "2026-08-09T11:43:24.557Z",
+      "date": "2026-08-09",
+      "branch": "روائع الافق",
+      "type": "مناقلة",
+      "box": "",
+      "gross": 1158.6,
+      "rate": 0,
+      "net": 1158.6,
+      "otherBranch": "فخامة الاطار",
+      "itemName": "رودستون",
+      "size": "285/70/17",
+      "receiverName": "حسين الوهاشي",
+      "price": 2,
+      "quantity": 579.301,
+      "transferred": false,
+      "notes": "",
+      "archiveNo": "SAL-RAF-005"
+    },
+    {
       "id": "mslqg40jj3ngdu4",
       "created_at": "2026-08-09T11:42:06.931Z",
       "date": "2026-08-09",
@@ -268,7 +288,7 @@
   "counters": {
     "CUS-RMN": 1,
     "SAL-GEN": 1,
-    "SAL-RAF": 4,
+    "SAL-RAF": 5,
     "SAL-RMN": 1,
     "TRF-FAK": 1,
     "EXP-FAK": 1,
