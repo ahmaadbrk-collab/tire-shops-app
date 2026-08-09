@@ -109,11 +109,26 @@
       <label class="field" id="s-other-branch-wrap" style="display:none;"><span>الفرع المقابل (استلم البضاعة) *</span>
         <select id="s-other-branch"><option value="">اختر الفرع</option></select>
       </label>
+      <div id="s-item-fields" style="display:none;">
+        <div class="row2">
+          <label class="field"><span>اسم الصنف *</span><input id="s-item-name" placeholder="مثال: إطار 175/65R14"></label>
+          <label class="field"><span>المقاس</span><input id="s-item-size" placeholder="مثال: 175/65R14"></label>
+        </div>
+        <label class="field"><span>اسم المستلم *</span><input id="s-receiver" placeholder="اسم الشخص المستلم"></label>
+        <div class="row2">
+          <label class="field"><span>السعر *</span><input type="number" step="0.01" id="s-price" placeholder="0.00"></label>
+          <label class="field"><span>الكمية *</span><input type="number" step="1" id="s-qty" placeholder="0"></label>
+        </div>
+        <div class="list-item" style="margin-bottom:12px;">
+          <span style="font-size:12px;color:#64748b;">الإجمالي</span>
+          <span style="font-weight:700;" id="s-item-total">0.00</span>
+        </div>
+      </div>
       <label class="field" id="s-box-wrap"><span>الصندوق *</span>
         <select id="s-box" disabled><option value="">اختر الصندوق أولاً</option></select>
       </label>
       <p class="hint" id="s-hint" style="display:none;">⚠ لازم تحدد الصندوق قبل ما تكتب المبلغ</p>
-      <label class="field"><span id="s-amount-label">المبلغ *</span><input type="number" step="0.01" id="s-gross" disabled placeholder="0.00"></label>
+      <label class="field" id="s-gross-wrap"><span id="s-amount-label">المبلغ *</span><input type="number" step="0.01" id="s-gross" disabled placeholder="0.00"></label>
       <label class="field" id="s-rate-wrap" style="display:none;"><span>نسبة العمولة % (مثال: 9.2)</span><input type="number" step="0.01" id="s-rate" placeholder="9.2"></label>
       <div class="list-item" id="s-net-preview" style="display:none;">
         <span style="font-size:12px;color:#64748b;">المبلغ الصافي المستحق</span>
@@ -377,7 +392,14 @@
     </div>
     <div id="d-view-branchTransfers" class="dview" style="display:none;">
       <div class="card">
-        <h3>🔄 كل عمليات مناقلة البضاعة بين الفروع</h3>
+        <h3>📅 اختر الفترة</h3>
+        <div class="row2">
+          <label class="field"><span>من تاريخ</span><input type="date" id="btr-from"></label>
+          <label class="field"><span>إلى تاريخ</span><input type="date" id="btr-to"></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔄 حركة الأصناف بين الفروع (بالتفصيل)</h3>
         <div id="d-btr-list"></div>
       </div>
       <div class="card">
@@ -498,6 +520,7 @@ fillSelect(document.getElementById('l-branch'), BRANCHES, 'اختر الفرع')
 fillSelect(document.getElementById('l-box'), BOX_TYPES, 'اختر الصندوق');
 document.getElementById('l-to').value = todayStr();
 ['l-branch','l-box','l-from','l-to'].forEach(id=>document.getElementById(id).addEventListener('change', renderDashboard));
+['btr-from','btr-to'].forEach(id=>document.getElementById(id).addEventListener('change', renderDashboard));
 
 /* ==================== التنقل بين قسم التسويات الفرعي ==================== */
 document.querySelectorAll('#tab-recon .chip').forEach(chip=>{
@@ -536,10 +559,19 @@ const sAmountLabel = document.getElementById('s-amount-label');
 function isBnpl(type){ return BNPL_TYPES.includes(type); }
 function isTransfer(type){ return type === 'مناقلة'; }
 
+const sItemName = document.getElementById('s-item-name');
+const sItemSize = document.getElementById('s-item-size');
+const sReceiver = document.getElementById('s-receiver');
+const sPrice = document.getElementById('s-price');
+const sQty = document.getElementById('s-qty');
+const sItemTotal = document.getElementById('s-item-total');
+
 function updateSalesForm(){
   const type = sType.value;
   const branch = document.getElementById('s-branch').value;
   document.getElementById('s-box-wrap').style.display = isTransfer(type) ? 'none' : 'block';
+  document.getElementById('s-gross-wrap').style.display = isTransfer(type) ? 'none' : 'block';
+  document.getElementById('s-item-fields').style.display = isTransfer(type) ? 'block' : 'none';
   document.getElementById('s-other-branch-wrap').style.display = isTransfer(type) ? 'block' : 'none';
   if(isTransfer(type)){
     const others = BRANCHES.filter(b=>b!==branch);
@@ -552,8 +584,13 @@ function updateSalesForm(){
     sBox.disabled = true; sBox.value = '';
   }
   sRateWrap.style.display = isBnpl(type) ? 'block' : 'none';
-  sAmountLabel.textContent = isBnpl(type) ? 'المبلغ الإجمالي (قبل العمولة) *' : (isTransfer(type) ? 'قيمة البضاعة المنقولة *' : 'المبلغ *');
+  sAmountLabel.textContent = isBnpl(type) ? 'المبلغ الإجمالي (قبل العمولة) *' : 'المبلغ *';
   updateSalesGrossState();
+}
+function updateItemTotal(){
+  const total = (parseFloat(sPrice.value)||0) * (parseFloat(sQty.value)||0);
+  sItemTotal.textContent = money(total);
+  return total;
 }
 function updateSalesGrossState(){
   const type = sType.value;
@@ -577,9 +614,16 @@ function updateNetPreview(){
 }
 function updateSalesSubmitState(){
   const type = sType.value;
+  if(isTransfer(type)){
+    const total = updateItemTotal();
+    const ok = document.getElementById('s-date').value && document.getElementById('s-branch').value &&
+      document.getElementById('s-other-branch').value && sItemName.value.trim() && sReceiver.value.trim() &&
+      total > 0;
+    sSubmit.disabled = !ok;
+    return;
+  }
   const baseOk = document.getElementById('s-date').value && document.getElementById('s-branch').value && type && sGross.value && parseFloat(sGross.value) > 0;
-  const ok = isTransfer(type) ? (baseOk && document.getElementById('s-other-branch').value) : (baseOk && sBox.value);
-  sSubmit.disabled = !ok;
+  sSubmit.disabled = !(baseOk && sBox.value);
 }
 sType.addEventListener('change', updateSalesForm);
 document.getElementById('s-branch').addEventListener('change', updateSalesForm);
@@ -588,21 +632,35 @@ sBox.addEventListener('change', updateSalesGrossState);
 sGross.addEventListener('input', ()=>{ updateNetPreview(); updateSalesSubmitState(); });
 sRate.addEventListener('input', updateNetPreview);
 document.getElementById('s-date').addEventListener('change', updateSalesSubmitState);
+[sItemName, sItemSize, sReceiver, sPrice, sQty].forEach(el=>el.addEventListener('input', updateSalesSubmitState));
 
 sSubmit.addEventListener('click', async ()=>{
   const type = sType.value;
-  const gross = parseFloat(sGross.value)||0;
-  const rate = isBnpl(type) ? (parseFloat(sRate.value)||0) : 0;
-  const net = Math.round(gross * (1 - rate/100) * 100)/100;
   sSubmit.disabled = true;
   try{
-    const r = await apiPost('/api/sales', {
-      date: document.getElementById('s-date').value, branch: document.getElementById('s-branch').value,
-      type, box: isTransfer(type) ? '' : sBox.value, gross, rate, net,
-      otherBranch: isTransfer(type) ? document.getElementById('s-other-branch').value : ''
-    });
+    let payload;
+    if(isTransfer(type)){
+      const price = parseFloat(sPrice.value)||0;
+      const qty = parseFloat(sQty.value)||0;
+      const total = Math.round(price*qty*100)/100;
+      payload = {
+        date: document.getElementById('s-date').value, branch: document.getElementById('s-branch').value,
+        type, box: '', gross: total, rate: 0, net: total,
+        otherBranch: document.getElementById('s-other-branch').value,
+        itemName: sItemName.value.trim(), size: sItemSize.value.trim(), receiverName: sReceiver.value.trim(),
+        price, quantity: qty, transferred: false
+      };
+    } else {
+      const gross = parseFloat(sGross.value)||0;
+      const rate = isBnpl(type) ? (parseFloat(sRate.value)||0) : 0;
+      const net = Math.round(gross * (1 - rate/100) * 100)/100;
+      payload = { date: document.getElementById('s-date').value, branch: document.getElementById('s-branch').value, type, box: sBox.value, gross, rate, net };
+    }
+    const r = await apiPost('/api/sales', payload);
     toast('تمت إضافة العملية' + (r.archiveNo ? ' · '+r.archiveNo : ''));
-    sGross.value=''; sRate.value=''; sType.value=''; updateSalesForm();
+    sGross.value=''; sRate.value=''; sType.value='';
+    sItemName.value=''; sItemSize.value=''; sReceiver.value=''; sPrice.value=''; sQty.value=''; sItemTotal.textContent='0.00';
+    updateSalesForm();
     await loadAllFromServer();
   }catch(e){ toast('تعذر الحفظ، تأكد من الاتصال'); }
   updateSalesSubmitState();
@@ -612,12 +670,28 @@ function renderSales(){
   document.getElementById('s-count').textContent = state.sales.length;
   const el = document.getElementById('s-list');
   if(state.sales.length === 0){ el.innerHTML = '<div class="empty">ما فيه عمليات بيع مسجلة بعد</div>'; return; }
-  el.innerHTML = state.sales.slice(0,50).map(s=>`
+  el.innerHTML = state.sales.slice(0,50).map(s=>{
+    if(s.type==='مناقلة'){
+      return `
+      <div class="list-item">
+        <div>
+          <div><span class="pill ${branchPillClass(s.branch)}">🏪 ${s.branch}</span> → <span class="pill ${branchPillClass(s.otherBranch)}">🏪 ${s.otherBranch||'-'}</span></div>
+          <div style="font-size:12px; color:#475569; font-weight:600; margin-top:4px;">${s.itemName||''}${s.size?' · مقاس '+s.size:''}</div>
+          <div style="font-size:11px;color:#94A3B8; margin-top:2px;">${s.date} · مستلم: ${s.receiverName||'-'} · ${s.quantity||0} × ${money(s.price||0)}${s.archiveNo?' · '+s.archiveNo:''}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="amount-pos">${money(s.net)}</span>
+          <button class="btn-outline" style="width:auto; padding:4px 10px; font-size:11px; ${s.transferred?'background:#F0FDF4;color:#15803D;border-color:#BBF7D0;':''}" data-toggle-sale-transferred="${s.id}">${s.transferred?'✅ مُرحّل':'⏳ لم يُرحّل'}</button>
+          <button class="del-btn" data-del-sale="${s.id}">🗑</button>
+        </div>
+      </div>`;
+    }
+    return `
     <div class="list-item">
       <div>
         <div>
           <span class="pill ${branchPillClass(s.branch)}">🏪 ${s.branch}</span>
-          ${s.type==='مناقلة' ? `<span style="font-size:11px; color:#7C3AED;">← ${s.otherBranch||''}</span>` : `<span class="pill pill-box">${s.box}</span>`}
+          <span class="pill pill-box">${s.box}</span>
           <span style="font-size:12px;color:#64748b;">${s.type}</span>
         </div>
         <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${s.date}${s.rate>0 ? ' · عمولة '+s.rate+'%' : ''}${s.archiveNo?' · '+s.archiveNo:''}</div>
@@ -626,14 +700,14 @@ function renderSales(){
         <span class="amount-pos">${money(s.net)}</span>
         <button class="del-btn" data-del-sale="${s.id}">🗑</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 document.getElementById('s-list').addEventListener('click', async (e)=>{
-  const id = e.target.closest('[data-del-sale]')?.dataset.delSale;
-  if(!id) return;
-  try{ await apiDelete('/api/sales/'+id); await loadAllFromServer(); }
-  catch(err){ toast('تعذر الحذف'); }
+  const delId = e.target.closest('[data-del-sale]')?.dataset.delSale;
+  if(delId){ try{ await apiDelete('/api/sales/'+delId); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); } return; }
+  const trId = e.target.closest('[data-toggle-sale-transferred]')?.dataset.toggleSaleTransferred;
+  if(trId){ try{ await apiPatch('/api/sales/'+trId+'/transferred'); await loadAllFromServer(); }catch(err){ toast('تعذر التحديث'); } }
 });
 
 /* ==================== تبويب المصروفات ==================== */
@@ -1214,17 +1288,24 @@ function renderDashboard(){
   }
 
   // تقرير مناقلات البضاعة بين الفروع
-  const branchTransfers = state.sales.filter(s=>s.type==='مناقلة');
+  const btrFrom = document.getElementById('btr-from').value;
+  const btrTo = document.getElementById('btr-to').value;
+  const branchTransfers = state.sales.filter(s=>s.type==='مناقلة' && inRange(s.date, btrFrom, btrTo));
   const btrListEl = document.getElementById('d-btr-list');
-  if(branchTransfers.length===0){ btrListEl.innerHTML = '<div class="empty">ما فيه مناقلات بضاعة مسجلة بعد</div>'; }
+  if(branchTransfers.length===0){ btrListEl.innerHTML = '<div class="empty">ما فيه مناقلات بضاعة بهذي الفترة</div>'; }
   else {
-    btrListEl.innerHTML = branchTransfers.slice(0,50).map(s=>`
+    btrListEl.innerHTML = `<p class="note">عدد العمليات: ${branchTransfers.length} · الإجمالي: <b>${money(branchTransfers.reduce((a,r)=>a+r.net,0))}</b></p>` +
+      branchTransfers.slice(0,80).map(s=>`
       <div class="list-item">
         <div>
           <div><span class="pill ${branchPillClass(s.branch)}">🏪 ${s.branch}</span> → <span class="pill ${branchPillClass(s.otherBranch)}">🏪 ${s.otherBranch||'-'}</span></div>
-          <div style="font-size:11px;color:#94A3B8; margin-top:4px;">${s.date}${s.archiveNo?' · '+s.archiveNo:''}${s.notes?' · '+s.notes:''}</div>
+          <div style="font-size:12px; color:#475569; font-weight:600; margin-top:4px;">${s.itemName||''}${s.size?' · مقاس '+s.size:''}</div>
+          <div style="font-size:11px;color:#94A3B8; margin-top:2px;">${s.date} · مستلم: ${s.receiverName||'-'} · ${s.quantity||0} × ${money(s.price||0)}${s.archiveNo?' · '+s.archiveNo:''}</div>
         </div>
-        <span style="font-weight:700;">${money(s.net)}</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-weight:700;">${money(s.net)}</span>
+          <button class="btn-outline" style="width:auto; padding:4px 10px; font-size:11px; ${s.transferred?'background:#F0FDF4;color:#15803D;border-color:#BBF7D0;':''}" data-toggle-btr="${s.id}">${s.transferred?'✅ مُرحّل':'⏳ لم يُرحّل'}</button>
+        </div>
       </div>
     `).join('');
   }
@@ -1239,7 +1320,7 @@ function renderDashboard(){
       if(aToB>0 || bToA>0) pairs.push({a, b, net});
     }
   }
-  if(pairs.length===0){ btrNetEl.innerHTML = '<div class="empty">لا يوجد رصيد بعد</div>'; }
+  if(pairs.length===0){ btrNetEl.innerHTML = '<div class="empty">لا يوجد رصيد بهذي الفترة</div>'; }
   else {
     btrNetEl.innerHTML = pairs.map(p=>{
       const owed = p.net>0 ? `${p.b} مدين لـ ${p.a}` : (p.net<0 ? `${p.a} مدين لـ ${p.b}` : 'متعادل');
@@ -1250,6 +1331,11 @@ function renderDashboard(){
   // دفتر الصندوق التفصيلي (كل حركة بالترتيب الزمني)
   renderLedger();
 }
+document.getElementById('d-btr-list').addEventListener('click', async (e)=>{
+  const id = e.target.closest('[data-toggle-btr]')?.dataset.toggleBtr;
+  if(!id) return;
+  try{ await apiPatch('/api/sales/'+id+'/transferred'); await loadAllFromServer(); }catch(err){ toast('تعذر التحديث'); }
+});
 
 function renderLedger(){
   const branch = document.getElementById('l-branch').value;
