@@ -1,6 +1,26 @@
 {
   "sales": [
     {
+      "id": "mslq8nb60qdy3bm",
+      "created_at": "2026-08-09T11:36:18.690Z",
+      "date": "2026-08-09",
+      "branch": "روائع الافق",
+      "type": "مناقلة",
+      "box": "",
+      "gross": 1294,
+      "rate": 0,
+      "net": 1294,
+      "otherBranch": "فخامة الاطار",
+      "itemName": "كومهو",
+      "size": "750/16",
+      "receiverName": "حسين الوهاشي",
+      "price": 323.5,
+      "quantity": 4,
+      "transferred": false,
+      "notes": "",
+      "archiveNo": "SAL-RAF-002"
+    },
+    {
       "id": "mslq6ki3avv72v3",
       "created_at": "2026-08-09T11:34:41.739Z",
       "date": "2026-08-09",
@@ -228,7 +248,7 @@
   "counters": {
     "CUS-RMN": 1,
     "SAL-GEN": 1,
-    "SAL-RAF": 1,
+    "SAL-RAF": 2,
     "SAL-RMN": 1,
     "TRF-FAK": 1,
     "EXP-FAK": 1,
