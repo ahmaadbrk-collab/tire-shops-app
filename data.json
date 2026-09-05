@@ -114,5 +114,15 @@
     "EXP-RMN": 1,
     "SAL-FAK": 30,
     "CUS-FAK": 2
-  }
+  },
+  "warehouses": [
+    {
+      "id": "mtoivq88aqnt22o",
+      "created_at": "2026-09-05T15:13:19.496Z",
+      "name": "مستودع فخامة الاطار"
+    }
+  ],
+  "stockEntries": [],
+  "dispatches": [],
+  "receipts": []
 }
