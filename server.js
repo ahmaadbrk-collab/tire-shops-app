@@ -19,7 +19,10 @@ const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
 const GITHUB_DATA_PATH = process.env.GITHUB_DATA_PATH || "data.json";
 const GITHUB_ENABLED = !!(GITHUB_TOKEN && GITHUB_REPO);
 
-const EMPTY_DB = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], counters: {} };
+const EMPTY_DB = {
+  sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], counters: {},
+  warehouses: [], stockEntries: [], dispatches: [], receipts: [],
+};
 
 const BRANCH_CODES = { "فخامة الاطار": "FAK", "روائع الافق": "RAF", "روعة المنار": "RMN" };
 
@@ -117,6 +120,10 @@ function nextArchiveNo(prefix, branch) {
   const key = `${prefix}-${code}`;
   db.counters[key] = (db.counters[key] || 0) + 1;
   return `${key}-${String(db.counters[key]).padStart(3, "0")}`;
+}
+function nextSimpleArchiveNo(prefix) {
+  db.counters[prefix] = (db.counters[prefix] || 0) + 1;
+  return `${prefix}-${String(db.counters[prefix]).padStart(3, "0")}`;
 }
 
 const app = express();
@@ -233,6 +240,128 @@ makeCollectionRoutes("custody", ["date", "branch", "box", "amount", "collector",
 makeCollectionRoutes("network", ["date", "branch", "bank_deposit", "notes"], ["bank_deposit"]);
 makeCollectionRoutes("cashClose", ["date", "branch", "actual_cash", "notes"], ["actual_cash"], "cash-close", ["closed"]);
 makeCollectionRoutes("transfers", ["date", "branch", "fromBox", "toBox", "amount", "notes"], ["amount"], "transfers", null, "TRF");
+
+/* ---------- نظام المخزون ---------- */
+makeCollectionRoutes("warehouses", ["name"], []);
+
+app.post("/api/stock-entries", requireAuth, async (req, res) => {
+  const b = req.body || {};
+  const record = {
+    id: genId(), created_at: new Date().toISOString(),
+    date: b.date || "", warehouse: b.warehouse || "",
+    items: Array.isArray(b.items) ? b.items.map((it) => ({
+      itemName: it.itemName || "", size: it.size || "",
+      price: Number(it.price) || 0, quantity: Number(it.quantity) || 0,
+    })) : [],
+    notes: b.notes || "",
+    archiveNo: nextSimpleArchiveNo("STK"),
+  };
+  db.stockEntries.unshift(record);
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ id: record.id, archiveNo: record.archiveNo });
+});
+app.put("/api/stock-entries/:id", requireAuth, async (req, res) => {
+  const rec = db.stockEntries.find((r) => r.id === req.params.id);
+  if (!rec) return res.status(404).json({ error: "not found" });
+  const b = req.body || {};
+  rec.date = b.date || rec.date;
+  rec.warehouse = b.warehouse || rec.warehouse;
+  rec.notes = b.notes !== undefined ? b.notes : rec.notes;
+  if (Array.isArray(b.items)) {
+    rec.items = b.items.map((it) => ({
+      itemName: it.itemName || "", size: it.size || "",
+      price: Number(it.price) || 0, quantity: Number(it.quantity) || 0,
+    }));
+  }
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ ok: true });
+});
+app.delete("/api/stock-entries/:id", requireAuth, async (req, res) => {
+  db.stockEntries = db.stockEntries.filter((r) => r.id !== req.params.id);
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ ok: true });
+});
+
+app.post("/api/dispatches", requireAuth, async (req, res) => {
+  const b = req.body || {};
+  const record = {
+    id: genId(), created_at: new Date().toISOString(),
+    date: b.date || "", warehouse: b.warehouse || "", receiverName: b.receiverName || "",
+    items: Array.isArray(b.items) ? b.items.map((it) => ({
+      itemName: it.itemName || "", size: it.size || "", quantity: Number(it.quantity) || 0,
+    })) : [],
+    notes: b.notes || "",
+    archiveNo: nextSimpleArchiveNo("OUT"),
+  };
+  db.dispatches.unshift(record);
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ id: record.id, archiveNo: record.archiveNo });
+});
+app.put("/api/dispatches/:id", requireAuth, async (req, res) => {
+  const rec = db.dispatches.find((r) => r.id === req.params.id);
+  if (!rec) return res.status(404).json({ error: "not found" });
+  const b = req.body || {};
+  rec.date = b.date || rec.date;
+  rec.warehouse = b.warehouse || rec.warehouse;
+  rec.receiverName = b.receiverName !== undefined ? b.receiverName : rec.receiverName;
+  rec.notes = b.notes !== undefined ? b.notes : rec.notes;
+  if (Array.isArray(b.items)) {
+    rec.items = b.items.map((it) => ({
+      itemName: it.itemName || "", size: it.size || "", quantity: Number(it.quantity) || 0,
+    }));
+  }
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ ok: true });
+});
+app.delete("/api/dispatches/:id", requireAuth, async (req, res) => {
+  db.dispatches = db.dispatches.filter((r) => r.id !== req.params.id);
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ ok: true });
+});
+
+app.post("/api/receipts", requireAuth, async (req, res) => {
+  const b = req.body || {};
+  const record = {
+    id: genId(), created_at: new Date().toISOString(),
+    date: b.date || "", dispatchId: b.dispatchId || "", dispatchArchiveNo: b.dispatchArchiveNo || "",
+    warehouse: b.warehouse || "",
+    items: Array.isArray(b.items) ? b.items.map((it) => ({
+      itemName: it.itemName || "", size: it.size || "",
+      dispatchedQty: Number(it.dispatchedQty) || 0,
+      sold: !!it.sold,
+      customerName: it.customerName || "", price: Number(it.price) || 0,
+      soldQty: Number(it.soldQty) || 0,
+    })) : [],
+    notes: b.notes || "",
+    archiveNo: nextSimpleArchiveNo("RCP"),
+  };
+  db.receipts.unshift(record);
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ id: record.id, archiveNo: record.archiveNo });
+});
+app.put("/api/receipts/:id", requireAuth, async (req, res) => {
+  const rec = db.receipts.find((r) => r.id === req.params.id);
+  if (!rec) return res.status(404).json({ error: "not found" });
+  const b = req.body || {};
+  rec.date = b.date || rec.date;
+  rec.notes = b.notes !== undefined ? b.notes : rec.notes;
+  if (Array.isArray(b.items)) {
+    rec.items = b.items.map((it) => ({
+      itemName: it.itemName || "", size: it.size || "",
+      dispatchedQty: Number(it.dispatchedQty) || 0,
+      sold: !!it.sold,
+      customerName: it.customerName || "", price: Number(it.price) || 0,
+      soldQty: Number(it.soldQty) || 0,
+    }));
+  }
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ ok: true });
+});
+app.delete("/api/receipts/:id", requireAuth, async (req, res) => {
+  db.receipts = db.receipts.filter((r) => r.id !== req.params.id);
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ ok: true });
+});
 
 /* ---------- تبديل حالة (رحّل / أُقفل) ---------- */
 app.patch("/api/custody/:id/forwarded", requireAuth, async (req, res) => {
