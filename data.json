@@ -1,26 +1,5 @@
 {
-  "sales": [
-    {
-      "id": "mslq1v5oj48ml1p",
-      "created_at": "2026-08-09T11:31:02.268Z",
-      "date": "2026-08-09",
-      "branch": "فخامة الاطار",
-      "type": "كاش",
-      "box": "نقدي",
-      "gross": 550,
-      "rate": 0,
-      "net": 550,
-      "otherBranch": "",
-      "itemName": "",
-      "size": "",
-      "receiverName": "",
-      "price": 0,
-      "quantity": 0,
-      "transferred": false,
-      "notes": "",
-      "archiveNo": "SAL-FAK-025"
-    }
-  ],
+  "sales": [],
   "expenses": [
     {
       "id": "mslqqbc5tbgqnoz",
