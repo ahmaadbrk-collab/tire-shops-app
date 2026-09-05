@@ -43,7 +43,7 @@
   .del-btn:hover{color:var(--red-text);}
   nav.bottom{position:fixed; bottom:0; inset-inline:0; background:#fff; border-top:1px solid var(--border); z-index:20;}
   nav.bottom .wrap{max-width:640px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr);}
-  nav.bottom button{background:none; border:none; padding:10px 0; font-size:11px; font-weight:600; color:var(--muted); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px;}
+  nav.bottom button{background:none; border:none; padding:8px 0; font-size:10px; font-weight:600; color:var(--muted); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;}
   nav.bottom button.active{color:var(--navy);}
   nav.bottom button .ic{font-size:18px;}
   .tabpane{display:none;} .tabpane.active{display:block;}
@@ -65,10 +65,38 @@
   .login-box p{margin:0 0 20px; font-size:12px; color:var(--muted); text-align:center;}
   .login-error{color:var(--red-text); font-size:12px; text-align:center; margin-top:10px; display:none;}
   #app-root{display:none;}
+
+  /* ==== المخزون ==== */
+  .item-line{display:grid; grid-template-columns:1fr; gap:8px; border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:8px; background:#FAFBFC;}
+  .item-line-row{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .item-added{display:flex; align-items:center; justify-content:space-between; border:1px solid #F1F5F9; border-radius:10px; padding:8px 10px; margin-bottom:6px; font-size:12px;}
+  .btn-sm{background:var(--navy); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer;}
+  .btn-sm-outline{background:#fff; color:var(--navy); border:1px solid var(--navy); border-radius:8px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer;}
+  .stock-qty-ok{color:var(--green-text); font-weight:700;}
+  .stock-qty-low{color:#D97706; font-weight:700;}
+  .stock-qty-zero{color:var(--red-text); font-weight:700;}
+
+  /* ==== الطباعة (سندات) ==== */
+  #print-area{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #print-area, #print-area *{visibility:visible;}
+    #print-area{display:block; position:absolute; inset:0; padding:24px;}
+  }
+  .print-title{font-size:20px; font-weight:800; text-align:center; margin-bottom:4px;}
+  .print-sub{text-align:center; color:#555; font-size:13px; margin-bottom:20px;}
+  .print-meta{display:flex; justify-content:space-between; font-size:13px; margin-bottom:16px; border-bottom:1px solid #ccc; padding-bottom:10px;}
+  .print-table{width:100%; border-collapse:collapse; margin-bottom:20px;}
+  .print-table th, .print-table td{border:1px solid #999; padding:8px; font-size:13px; text-align:center;}
+  .print-table th{background:#eee;}
+  .print-statement{font-size:14px; margin:20px 0; line-height:1.8;}
+  .print-sign{display:flex; justify-content:space-between; margin-top:60px; font-size:13px;}
+  .print-sign div{width:45%; border-top:1px solid #333; padding-top:6px; text-align:center;}
 </style>
 </head>
 <body>
 
+<div id="print-area"></div>
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <h2>🏬 نظام متابعة محلات الإطارات</h2>
@@ -293,6 +321,112 @@
     </div>
   </section>
 
+  <!-- تبويب المخزون -->
+  <section id="tab-inventory" class="tabpane">
+    <div class="chiprow">
+      <button class="chip active" data-ivview="setup">تهيئة المستودعات</button>
+      <button class="chip" data-ivview="dispatch">إخراج بضاعة</button>
+      <button class="chip" data-ivview="receipt">استلام البضاعة</button>
+      <button class="chip" data-ivview="stock">المخزون الحالي</button>
+    </div>
+
+    <!-- تهيئة المستودعات -->
+    <div id="ivview-setup" class="ivview">
+      <div class="card">
+        <h3>🏢 إضافة مستودع</h3>
+        <div style="display:flex; gap:8px;">
+          <input id="wh-name" placeholder="اسم المستودع" style="flex:1;">
+          <button class="btn-sm" id="wh-add" style="width:auto;">إضافة</button>
+        </div>
+      </div>
+      <div class="card" id="wh-list-card" style="display:none;">
+        <h3>📋 المستودعات</h3>
+        <div id="wh-list"></div>
+      </div>
+      <div class="card">
+        <h3>📥 تهيئة / إضافة بضاعة للمخزون</h3>
+        <input type="hidden" id="stk-edit-id">
+        <div class="row2">
+          <label class="field"><span>التاريخ *</span><input type="date" id="stk-date"></label>
+          <label class="field"><span>المستودع *</span><select id="stk-warehouse"><option value="">اختر المستودع</option></select></label>
+        </div>
+        <div class="item-line">
+          <div class="item-line-row">
+            <label class="field" style="margin-bottom:0;"><span>اسم الصنف</span><input id="stk-item-name" placeholder="مثال: إطار ميشلان"></label>
+            <label class="field" style="margin-bottom:0;"><span>المقاس</span><input id="stk-item-size" placeholder="مثال: 175/65R14"></label>
+          </div>
+          <div class="item-line-row">
+            <label class="field" style="margin-bottom:0;"><span>السعر</span><input type="number" step="0.01" id="stk-item-price" placeholder="0.00"></label>
+            <label class="field" style="margin-bottom:0;"><span>الكمية</span><input type="number" step="1" id="stk-item-qty" placeholder="0"></label>
+          </div>
+          <button class="btn-sm-outline" id="stk-add-line" style="width:100%;">+ إضافة الصنف للقائمة</button>
+        </div>
+        <div id="stk-lines"></div>
+        <label class="field"><span>ملاحظات</span><input id="stk-notes" placeholder="اختياري"></label>
+        <button class="btn-primary" id="stk-submit" disabled>حفظ التهيئة</button>
+      </div>
+      <div class="card">
+        <h3>📋 سجل عمليات التهيئة (<span id="stk-count">0</span>)</h3>
+        <div id="stk-list"></div>
+      </div>
+    </div>
+
+    <!-- إخراج بضاعة -->
+    <div id="ivview-dispatch" class="ivview" style="display:none;">
+      <div class="card">
+        <h3>📤 سند إخراج بضاعة جديد</h3>
+        <input type="hidden" id="out-edit-id">
+        <div class="row2">
+          <label class="field"><span>التاريخ *</span><input type="date" id="out-date"></label>
+          <label class="field"><span>المستودع *</span><select id="out-warehouse"><option value="">اختر المستودع</option></select></label>
+        </div>
+        <label class="field"><span>اسم المستلم (المحصل) *</span><input id="out-receiver" placeholder="اسم المستلم"></label>
+        <div class="item-line">
+          <div class="item-line-row">
+            <label class="field" style="margin-bottom:0;"><span>اسم الصنف</span><input id="out-item-name" placeholder="مثال: إطار ميشلان"></label>
+            <label class="field" style="margin-bottom:0;"><span>المقاس</span><input id="out-item-size" placeholder="مثال: 175/65R14"></label>
+          </div>
+          <label class="field" style="margin-bottom:0;"><span>الكمية</span><input type="number" step="1" id="out-item-qty" placeholder="0"></label>
+          <button class="btn-sm-outline" id="out-add-line" style="width:100%; margin-top:8px;">+ إضافة الصنف للقائمة</button>
+        </div>
+        <div id="out-lines"></div>
+        <label class="field"><span>ملاحظات</span><input id="out-notes" placeholder="اختياري"></label>
+        <button class="btn-primary" id="out-submit" disabled>حفظ سند الإخراج</button>
+      </div>
+      <div class="card">
+        <h3>📋 سجل سندات الإخراج (<span id="out-count">0</span>)</h3>
+        <div id="out-list"></div>
+      </div>
+    </div>
+
+    <!-- استلام البضاعة -->
+    <div id="ivview-receipt" class="ivview" style="display:none;">
+      <div class="card">
+        <h3>📥 تسوية استلام بضاعة</h3>
+        <input type="hidden" id="rcp-edit-id">
+        <label class="field"><span>رقم سند الإخراج *</span>
+          <select id="rcp-dispatch"><option value="">اختر سند الإخراج</option></select>
+        </label>
+        <label class="field"><span>التاريخ *</span><input type="date" id="rcp-date"></label>
+        <div id="rcp-items"></div>
+        <label class="field"><span>ملاحظات</span><input id="rcp-notes" placeholder="اختياري"></label>
+        <button class="btn-primary" id="rcp-submit" disabled>حفظ الاستلام</button>
+      </div>
+      <div class="card">
+        <h3>📋 سجل سندات الاستلام (<span id="rcp-count">0</span>)</h3>
+        <div id="rcp-list"></div>
+      </div>
+    </div>
+
+    <!-- المخزون الحالي -->
+    <div id="ivview-stock" class="ivview" style="display:none;">
+      <div class="card">
+        <h3>📦 المخزون الحالي حسب المستودع</h3>
+        <div id="stock-report"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- تبويب الموظفين -->
   <section id="tab-employees" class="tabpane">
     <div class="card">
@@ -411,11 +545,12 @@
 </main>
 
 <nav class="bottom">
-  <div class="wrap" style="grid-template-columns:repeat(6,1fr);">
+  <div class="wrap" style="grid-template-columns:repeat(7,1fr);">
     <button data-tab="sales" class="active"><span class="ic">🧾</span>مبيعات</button>
     <button data-tab="expenses"><span class="ic">💸</span>مصروفات</button>
     <button data-tab="income"><span class="ic">⬇️</span>وارد نقدي</button>
     <button data-tab="recon"><span class="ic">🏦</span>تسويات</button>
+    <button data-tab="inventory"><span class="ic">📦</span>مخزون</button>
     <button data-tab="employees"><span class="ic">👥</span>موظفين</button>
     <button data-tab="dashboard"><span class="ic">📊</span>تقارير</button>
   </div>
@@ -454,8 +589,13 @@ async function apiPatch(url){
   if(!r.ok) throw new Error('request failed');
   return r.json();
 }
+async function apiPut(url, body){
+  const r = await fetch(url, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  if(!r.ok) throw new Error('request failed');
+  return r.json();
+}
 
-let state = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [] };
+let state = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], warehouses: [], stockEntries: [], dispatches: [], receipts: [] };
 
 async function loadAllFromServer(){
   try{
@@ -468,6 +608,10 @@ async function loadAllFromServer(){
     state.network = data.network || [];
     state.cashClose = data.cashClose || [];
     state.transfers = data.transfers || [];
+    state.warehouses = data.warehouses || [];
+    state.stockEntries = data.stockEntries || [];
+    state.dispatches = data.dispatches || [];
+    state.receipts = data.receipts || [];
   }catch(e){
     toast('تعذر تحميل البيانات، تأكد من الاتصال');
   }
@@ -512,6 +656,9 @@ document.getElementById('n-date').value = todayStr();
 document.getElementById('c-date').value = todayStr();
 document.getElementById('cc-date').value = todayStr();
 document.getElementById('t-date').value = todayStr();
+document.getElementById('stk-date').value = todayStr();
+document.getElementById('out-date').value = todayStr();
+document.getElementById('rcp-date').value = todayStr();
 document.getElementById('d-date-from').value = todayStr();
 document.getElementById('d-date-to').value = todayStr();
 document.getElementById('d-box-from').value = todayStr();
@@ -532,6 +679,17 @@ document.querySelectorAll('#tab-recon .chip').forEach(chip=>{
   });
 });
 
+document.querySelectorAll('#tab-inventory .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#tab-inventory .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    document.querySelectorAll('#tab-inventory .ivview').forEach(v=>v.style.display='none');
+    document.getElementById('ivview-'+chip.dataset.ivview).style.display='block';
+    if(chip.dataset.ivview==='stock') renderStockReport();
+    if(chip.dataset.ivview==='receipt') refreshDispatchSelect();
+  });
+});
+
 /* ==================== التنقل بين التبويبات ==================== */
 document.querySelectorAll('nav.bottom button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -541,6 +699,7 @@ document.querySelectorAll('nav.bottom button').forEach(btn=>{
     document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab === 'dashboard') renderDashboard();
     if(btn.dataset.tab === 'employees') renderEmployeesTab();
+    if(btn.dataset.tab === 'inventory') renderInventoryTab();
   });
 });
 
@@ -1157,6 +1316,400 @@ document.getElementById('e-list').addEventListener('click', async (e)=>{
   if(!id) return;
   try{ await apiDelete('/api/employees/'+id); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); }
 });
+
+/* ==================== المخزون ==================== */
+function stockKey(w, name, size){ return w+'||'+name+'||'+size; }
+
+function computeStock(){
+  const qty = {}; // key -> {warehouse, itemName, size, qty, lastPrice}
+  state.stockEntries.forEach(e=>{
+    (e.items||[]).forEach(it=>{
+      const k = stockKey(e.warehouse, it.itemName, it.size);
+      if(!qty[k]) qty[k] = {warehouse:e.warehouse, itemName:it.itemName, size:it.size, qty:0, lastPrice:it.price};
+      qty[k].qty += Number(it.quantity)||0;
+      qty[k].lastPrice = it.price;
+    });
+  });
+  state.dispatches.forEach(d=>{
+    (d.items||[]).forEach(it=>{
+      const k = stockKey(d.warehouse, it.itemName, it.size);
+      if(!qty[k]) qty[k] = {warehouse:d.warehouse, itemName:it.itemName, size:it.size, qty:0, lastPrice:0};
+      qty[k].qty -= Number(it.quantity)||0;
+    });
+  });
+  state.receipts.forEach(r=>{
+    (r.items||[]).forEach(it=>{
+      const unsold = (Number(it.dispatchedQty)||0) - (Number(it.soldQty)||0);
+      const k = stockKey(r.warehouse, it.itemName, it.size);
+      if(!qty[k]) qty[k] = {warehouse:r.warehouse, itemName:it.itemName, size:it.size, qty:0, lastPrice:0};
+      qty[k].qty += unsold;
+    });
+  });
+  return Object.values(qty);
+}
+
+function renderStockReport(){
+  const el = document.getElementById('stock-report');
+  const stock = computeStock().sort((a,z)=> a.warehouse.localeCompare(z.warehouse) || a.itemName.localeCompare(z.itemName));
+  if(stock.length===0){ el.innerHTML = '<div class="empty">ما فيه بيانات مخزون بعد</div>'; return; }
+  const byWarehouse = {};
+  stock.forEach(s=>{ (byWarehouse[s.warehouse] = byWarehouse[s.warehouse]||[]).push(s); });
+  el.innerHTML = Object.entries(byWarehouse).map(([wh, items])=>`
+    <div style="margin-bottom:14px;">
+      <div style="font-weight:700; font-size:13px; color:#1F4E78; margin-bottom:6px;">🏢 ${wh}</div>
+      ${items.map(it=>{
+        const cls = it.qty<=0 ? 'stock-qty-zero' : (it.qty<5 ? 'stock-qty-low' : 'stock-qty-ok');
+        return `<div class="box-row"><span>${it.itemName}${it.size?' · '+it.size:''}</span><span class="${cls}">${it.qty}</span></div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+
+/* ---- المستودعات ---- */
+function refreshWarehouseSelects(){
+  const names = state.warehouses.map(w=>w.name);
+  fillSelect(document.getElementById('stk-warehouse'), names, 'اختر المستودع');
+  fillSelect(document.getElementById('out-warehouse'), names, 'اختر المستودع');
+}
+document.getElementById('wh-add').addEventListener('click', async ()=>{
+  const name = document.getElementById('wh-name').value.trim();
+  if(!name) return;
+  try{
+    await apiPost('/api/warehouses', {name});
+    document.getElementById('wh-name').value='';
+    toast('تمت إضافة المستودع');
+    await loadAllFromServer();
+  }catch(e){ toast('تعذر الحفظ'); }
+});
+function renderWarehouseList(){
+  const card = document.getElementById('wh-list-card');
+  const el = document.getElementById('wh-list');
+  if(state.warehouses.length===0){ card.style.display='none'; return; }
+  card.style.display='block';
+  el.innerHTML = state.warehouses.map(w=>`<span class="emp-chip"><button class="del-btn" data-del-wh="${w.id}" style="font-size:12px;">🗑</button>${w.name}</span>`).join('');
+  refreshWarehouseSelects();
+}
+document.getElementById('wh-list').addEventListener('click', async (e)=>{
+  const id = e.target.closest('[data-del-wh]')?.dataset.delWh;
+  if(!id) return;
+  try{ await apiDelete('/api/warehouses/'+id); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); }
+});
+
+/* ---- تهيئة / إدخال بضاعة ---- */
+let stkLines = [];
+function renderStkLines(){
+  const el = document.getElementById('stk-lines');
+  el.innerHTML = stkLines.map((it,i)=>`
+    <div class="item-added">
+      <span>${it.itemName}${it.size?' · '+it.size:''} — ${it.quantity} × ${money(it.price)} = <b>${money(it.price*it.quantity)}</b></span>
+      <button class="del-btn" data-rm-stk-line="${i}">🗑</button>
+    </div>`).join('');
+  updateStkSubmitState();
+}
+document.getElementById('stk-lines').addEventListener('click', (e)=>{
+  const idx = e.target.closest('[data-rm-stk-line]')?.dataset.rmStkLine;
+  if(idx===undefined) return;
+  stkLines.splice(Number(idx),1);
+  renderStkLines();
+});
+document.getElementById('stk-add-line').addEventListener('click', ()=>{
+  const name = document.getElementById('stk-item-name').value.trim();
+  const size = document.getElementById('stk-item-size').value.trim();
+  const price = parseFloat(document.getElementById('stk-item-price').value)||0;
+  const qty = parseFloat(document.getElementById('stk-item-qty').value)||0;
+  if(!name || qty<=0){ toast('أدخل اسم الصنف والكمية'); return; }
+  stkLines.push({itemName:name, size, price, quantity:qty});
+  document.getElementById('stk-item-name').value=''; document.getElementById('stk-item-size').value='';
+  document.getElementById('stk-item-price').value=''; document.getElementById('stk-item-qty').value='';
+  renderStkLines();
+});
+function updateStkSubmitState(){
+  const ok = document.getElementById('stk-date').value && document.getElementById('stk-warehouse').value && stkLines.length>0;
+  document.getElementById('stk-submit').disabled = !ok;
+}
+['stk-date','stk-warehouse'].forEach(id=>document.getElementById(id).addEventListener('change', updateStkSubmitState));
+document.getElementById('stk-submit').addEventListener('click', async ()=>{
+  const editId = document.getElementById('stk-edit-id').value;
+  const payload = {
+    date: document.getElementById('stk-date').value, warehouse: document.getElementById('stk-warehouse').value,
+    items: stkLines, notes: document.getElementById('stk-notes').value
+  };
+  document.getElementById('stk-submit').disabled = true;
+  try{
+    if(editId){ await apiPut('/api/stock-entries/'+editId, payload); toast('تم تحديث التهيئة'); }
+    else{ const r = await apiPost('/api/stock-entries', payload); toast('تم الحفظ · '+(r.archiveNo||'')); }
+    stkLines = []; document.getElementById('stk-edit-id').value='';
+    document.getElementById('stk-notes').value=''; renderStkLines();
+    await loadAllFromServer();
+  }catch(e){ toast('تعذر الحفظ'); }
+  updateStkSubmitState();
+});
+function renderStockEntries(){
+  document.getElementById('stk-count').textContent = state.stockEntries.length;
+  const el = document.getElementById('stk-list');
+  if(state.stockEntries.length===0){ el.innerHTML = '<div class="empty">ما فيه عمليات تهيئة مسجلة بعد</div>'; return; }
+  el.innerHTML = state.stockEntries.slice(0,40).map(e=>`
+    <div class="list-item">
+      <div>
+        <div style="font-weight:600; font-size:12px;">🏢 ${e.warehouse}</div>
+        <div style="font-size:11px;color:#94A3B8; margin-top:2px;">${e.date} · ${(e.items||[]).length} صنف · ${e.archiveNo||''}</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-outline" style="width:auto; padding:4px 10px; font-size:11px;" data-edit-stk="${e.id}">✏️ تعديل</button>
+        <button class="del-btn" data-del-stk="${e.id}">🗑</button>
+      </div>
+    </div>`).join('');
+}
+document.getElementById('stk-list').addEventListener('click', async (e)=>{
+  const delId = e.target.closest('[data-del-stk]')?.dataset.delStk;
+  if(delId){ try{ await apiDelete('/api/stock-entries/'+delId); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); } return; }
+  const editId = e.target.closest('[data-edit-stk]')?.dataset.editStk;
+  if(editId){
+    const rec = state.stockEntries.find(x=>x.id===editId);
+    if(!rec) return;
+    document.getElementById('stk-edit-id').value = editId;
+    document.getElementById('stk-date').value = rec.date;
+    refreshWarehouseSelects();
+    document.getElementById('stk-warehouse').value = rec.warehouse;
+    document.getElementById('stk-notes').value = rec.notes||'';
+    stkLines = (rec.items||[]).map(it=>({...it}));
+    renderStkLines();
+    toast('عدّل البيانات واضغط حفظ التهيئة');
+  }
+});
+
+/* ---- إخراج بضاعة ---- */
+let outLines = [];
+function renderOutLines(){
+  const el = document.getElementById('out-lines');
+  el.innerHTML = outLines.map((it,i)=>`
+    <div class="item-added">
+      <span>${it.itemName}${it.size?' · '+it.size:''} — الكمية: <b>${it.quantity}</b></span>
+      <button class="del-btn" data-rm-out-line="${i}">🗑</button>
+    </div>`).join('');
+  updateOutSubmitState();
+}
+document.getElementById('out-lines').addEventListener('click', (e)=>{
+  const idx = e.target.closest('[data-rm-out-line]')?.dataset.rmOutLine;
+  if(idx===undefined) return;
+  outLines.splice(Number(idx),1);
+  renderOutLines();
+});
+document.getElementById('out-add-line').addEventListener('click', ()=>{
+  const name = document.getElementById('out-item-name').value.trim();
+  const size = document.getElementById('out-item-size').value.trim();
+  const qty = parseFloat(document.getElementById('out-item-qty').value)||0;
+  if(!name || qty<=0){ toast('أدخل اسم الصنف والكمية'); return; }
+  outLines.push({itemName:name, size, quantity:qty});
+  document.getElementById('out-item-name').value=''; document.getElementById('out-item-size').value=''; document.getElementById('out-item-qty').value='';
+  renderOutLines();
+});
+function updateOutSubmitState(){
+  const ok = document.getElementById('out-date').value && document.getElementById('out-warehouse').value &&
+    document.getElementById('out-receiver').value.trim() && outLines.length>0;
+  document.getElementById('out-submit').disabled = !ok;
+}
+['out-date','out-warehouse','out-receiver'].forEach(id=>document.getElementById(id).addEventListener('input', updateOutSubmitState));
+document.getElementById('out-submit').addEventListener('click', async ()=>{
+  const editId = document.getElementById('out-edit-id').value;
+  const payload = {
+    date: document.getElementById('out-date').value, warehouse: document.getElementById('out-warehouse').value,
+    receiverName: document.getElementById('out-receiver').value.trim(),
+    items: outLines, notes: document.getElementById('out-notes').value
+  };
+  document.getElementById('out-submit').disabled = true;
+  try{
+    if(editId){ await apiPut('/api/dispatches/'+editId, payload); toast('تم تحديث سند الإخراج'); }
+    else{ const r = await apiPost('/api/dispatches', payload); toast('تم الحفظ · '+(r.archiveNo||'')); }
+    outLines = []; document.getElementById('out-edit-id').value='';
+    document.getElementById('out-receiver').value=''; document.getElementById('out-notes').value=''; renderOutLines();
+    await loadAllFromServer();
+  }catch(e){ toast('تعذر الحفظ'); }
+  updateOutSubmitState();
+});
+function renderDispatches(){
+  document.getElementById('out-count').textContent = state.dispatches.length;
+  const el = document.getElementById('out-list');
+  if(state.dispatches.length===0){ el.innerHTML = '<div class="empty">ما فيه سندات إخراج مسجلة بعد</div>'; return; }
+  el.innerHTML = state.dispatches.slice(0,40).map(d=>`
+    <div class="list-item">
+      <div>
+        <div style="font-weight:600; font-size:12px;">🏢 ${d.warehouse} → ${d.receiverName}</div>
+        <div style="font-size:11px;color:#94A3B8; margin-top:2px;">${d.date} · ${(d.items||[]).length} صنف · ${d.archiveNo||''}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-outline" style="width:auto; padding:4px 8px; font-size:11px;" data-print-out="${d.id}">🖨️</button>
+        <button class="btn-outline" style="width:auto; padding:4px 8px; font-size:11px;" data-edit-out="${d.id}">✏️</button>
+        <button class="del-btn" data-del-out="${d.id}">🗑</button>
+      </div>
+    </div>`).join('');
+}
+document.getElementById('out-list').addEventListener('click', async (e)=>{
+  const delId = e.target.closest('[data-del-out]')?.dataset.delOut;
+  if(delId){ try{ await apiDelete('/api/dispatches/'+delId); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); } return; }
+  const editId = e.target.closest('[data-edit-out]')?.dataset.editOut;
+  if(editId){
+    const rec = state.dispatches.find(x=>x.id===editId);
+    if(!rec) return;
+    document.getElementById('out-edit-id').value = editId;
+    document.getElementById('out-date').value = rec.date;
+    refreshWarehouseSelects();
+    document.getElementById('out-warehouse').value = rec.warehouse;
+    document.getElementById('out-receiver').value = rec.receiverName||'';
+    document.getElementById('out-notes').value = rec.notes||'';
+    outLines = (rec.items||[]).map(it=>({...it}));
+    renderOutLines();
+    toast('عدّل البيانات واضغط حفظ سند الإخراج');
+    return;
+  }
+  const printId = e.target.closest('[data-print-out]')?.dataset.printOut;
+  if(printId){ const rec = state.dispatches.find(x=>x.id===printId); if(rec) printDispatch(rec); }
+});
+
+/* ---- استلام البضاعة ---- */
+function refreshDispatchSelect(){
+  const sel = document.getElementById('rcp-dispatch');
+  sel.innerHTML = '<option value="">اختر سند الإخراج</option>' +
+    state.dispatches.map(d=>`<option value="${d.id}">${d.archiveNo||''} — ${d.warehouse} — ${d.receiverName} (${d.date})</option>`).join('');
+}
+let rcpItems = [];
+document.getElementById('rcp-dispatch').addEventListener('change', ()=>{
+  const id = document.getElementById('rcp-dispatch').value;
+  const rec = state.dispatches.find(x=>x.id===id);
+  if(!rec){ rcpItems=[]; renderRcpItems(); return; }
+  rcpItems = (rec.items||[]).map(it=>({
+    itemName: it.itemName, size: it.size, dispatchedQty: it.quantity,
+    sold: true, customerName: '', price: 0, soldQty: it.quantity
+  }));
+  renderRcpItems();
+});
+function renderRcpItems(){
+  const el = document.getElementById('rcp-items');
+  if(rcpItems.length===0){ el.innerHTML=''; updateRcpSubmitState(); return; }
+  el.innerHTML = rcpItems.map((it,i)=>`
+    <div class="item-line">
+      <div style="font-weight:600; font-size:12px; margin-bottom:6px;">${it.itemName}${it.size?' · '+it.size:''} (خرج: ${it.dispatchedQty})</div>
+      <label style="display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:8px;">
+        <input type="checkbox" data-rcp-sold="${i}" ${it.sold?'checked':''}> انباع
+      </label>
+      <div class="item-line-row">
+        <label class="field" style="margin-bottom:0;"><span>اسم العميل</span><input data-rcp-customer="${i}" value="${it.customerName}" placeholder="اسم العميل"></label>
+        <label class="field" style="margin-bottom:0;"><span>السعر</span><input type="number" step="0.01" data-rcp-price="${i}" value="${it.price||''}" placeholder="0.00"></label>
+      </div>
+      <label class="field" style="margin-bottom:0;"><span>الكمية المباعة</span><input type="number" step="1" data-rcp-qty="${i}" value="${it.soldQty}" placeholder="0"></label>
+      <div style="font-size:11px; color:#64748B; margin-top:6px;">الإجمالي: <b>${money((it.price||0)*(it.soldQty||0))}</b> · المتبقي للمخزون: <b>${it.dispatchedQty-it.soldQty}</b></div>
+    </div>
+  `).join('');
+  updateRcpSubmitState();
+}
+document.getElementById('rcp-items').addEventListener('input', (e)=>{
+  const i1 = e.target.dataset.rcpCustomer, i2 = e.target.dataset.rcpPrice, i3 = e.target.dataset.rcpQty;
+  if(i1!==undefined) rcpItems[i1].customerName = e.target.value;
+  if(i2!==undefined) rcpItems[i2].price = parseFloat(e.target.value)||0;
+  if(i3!==undefined) rcpItems[i3].soldQty = Math.min(parseFloat(e.target.value)||0, rcpItems[i3].dispatchedQty);
+  renderRcpItems();
+});
+document.getElementById('rcp-items').addEventListener('change', (e)=>{
+  const i = e.target.dataset.rcpSold;
+  if(i!==undefined) rcpItems[i].sold = e.target.checked;
+});
+function updateRcpSubmitState(){
+  const ok = document.getElementById('rcp-dispatch').value && document.getElementById('rcp-date').value && rcpItems.length>0;
+  document.getElementById('rcp-submit').disabled = !ok;
+}
+document.getElementById('rcp-date').addEventListener('change', updateRcpSubmitState);
+document.getElementById('rcp-submit').addEventListener('click', async ()=>{
+  const editId = document.getElementById('rcp-edit-id').value;
+  const dispatchId = document.getElementById('rcp-dispatch').value;
+  const dispatchRec = state.dispatches.find(x=>x.id===dispatchId);
+  const payload = {
+    date: document.getElementById('rcp-date').value, dispatchId,
+    dispatchArchiveNo: dispatchRec?dispatchRec.archiveNo:'', warehouse: dispatchRec?dispatchRec.warehouse:'',
+    items: rcpItems, notes: document.getElementById('rcp-notes').value
+  };
+  document.getElementById('rcp-submit').disabled = true;
+  try{
+    if(editId){ await apiPut('/api/receipts/'+editId, payload); toast('تم تحديث الاستلام'); }
+    else{ const r = await apiPost('/api/receipts', payload); toast('تم الحفظ · '+(r.archiveNo||'')); }
+    rcpItems = []; document.getElementById('rcp-edit-id').value=''; document.getElementById('rcp-notes').value='';
+    document.getElementById('rcp-dispatch').value=''; renderRcpItems();
+    await loadAllFromServer();
+  }catch(e){ toast('تعذر الحفظ'); }
+  updateRcpSubmitState();
+});
+function renderReceipts(){
+  document.getElementById('rcp-count').textContent = state.receipts.length;
+  const el = document.getElementById('rcp-list');
+  if(state.receipts.length===0){ el.innerHTML = '<div class="empty">ما فيه سندات استلام مسجلة بعد</div>'; return; }
+  el.innerHTML = state.receipts.slice(0,40).map(r=>{
+    const total = (r.items||[]).reduce((a,it)=>a+(it.price||0)*(it.soldQty||0),0);
+    return `
+    <div class="list-item">
+      <div>
+        <div style="font-weight:600; font-size:12px;">🧾 ${r.dispatchArchiveNo||''} · ${r.warehouse}</div>
+        <div style="font-size:11px;color:#94A3B8; margin-top:2px;">${r.date} · إجمالي المباع: ${money(total)} · ${r.archiveNo||''}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-outline" style="width:auto; padding:4px 8px; font-size:11px;" data-print-rcp="${r.id}">🖨️</button>
+        <button class="del-btn" data-del-rcp="${r.id}">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('rcp-list').addEventListener('click', async (e)=>{
+  const delId = e.target.closest('[data-del-rcp]')?.dataset.delRcp;
+  if(delId){ try{ await apiDelete('/api/receipts/'+delId); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); } return; }
+  const printId = e.target.closest('[data-print-rcp]')?.dataset.printRcp;
+  if(printId){ const rec = state.receipts.find(x=>x.id===printId); if(rec) printReceipt(rec); }
+});
+
+/* ---- الطباعة ---- */
+function printDispatch(d){
+  const rows = (d.items||[]).map(it=>`<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.quantity}</td></tr>`).join('');
+  document.getElementById('print-area').innerHTML = `
+    <div class="print-title">سند إخراج بضاعة</div>
+    <div class="print-sub">رقم السند: ${d.archiveNo||''}</div>
+    <div class="print-meta"><span>المستودع: ${d.warehouse}</span><span>التاريخ: ${d.date}</span><span>المستلم: ${d.receiverName}</span></div>
+    <table class="print-table"><thead><tr><th>اسم الصنف</th><th>المقاس</th><th>الكمية</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="print-statement">استلمت البضاعة المذكورة أعلاه كما هي بالكميات والمقاسات الموضحة.</div>
+    <div class="print-sign"><div>توقيع المستلم: ${d.receiverName}</div><div>توقيع المسؤول</div></div>
+  `;
+  window.print();
+}
+function printReceipt(r){
+  const sold = (r.items||[]).filter(it=>it.sold && it.soldQty>0);
+  const rows = sold.map(it=>`<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.customerName||'-'}</td><td>${it.soldQty}</td><td>${money(it.price)}</td><td>${money(it.price*it.soldQty)}</td></tr>`).join('');
+  const total = sold.reduce((a,it)=>a+it.price*it.soldQty,0);
+  const returned = (r.items||[]).map(it=>`<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.dispatchedQty-it.soldQty}</td></tr>`).join('');
+  document.getElementById('print-area').innerHTML = `
+    <div class="print-title">سند استلام بضاعة</div>
+    <div class="print-sub">رقم السند: ${r.archiveNo||''} — مرجع سند الإخراج: ${r.dispatchArchiveNo||''}</div>
+    <div class="print-meta"><span>المستودع: ${r.warehouse}</span><span>التاريخ: ${r.date}</span></div>
+    <div style="font-weight:700; margin-bottom:8px;">الأصناف المباعة</div>
+    <table class="print-table"><thead><tr><th>الصنف</th><th>المقاس</th><th>العميل</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="6">لا يوجد</td></tr>'}</tbody></table>
+    <div style="text-align:left; font-weight:700; margin-bottom:20px;">إجمالي المبيعات: ${money(total)}</div>
+    <div style="font-weight:700; margin-bottom:8px;">الأصناف الراجعة للمخزون</div>
+    <table class="print-table"><thead><tr><th>الصنف</th><th>المقاس</th><th>الكمية الراجعة</th></tr></thead>
+    <tbody>${returned}</tbody></table>
+    <div class="print-statement">تم استلام البضاعة المتبقية بعد خصم البضاعة التي بيعت منها.</div>
+    <div class="print-sign"><div>توقيع المستلم</div><div>توقيع المسؤول</div></div>
+  `;
+  window.print();
+}
+
+function renderInventoryTab(){
+  refreshWarehouseSelects();
+  renderWarehouseList();
+  renderStkLines();
+  renderStockEntries();
+  renderOutLines();
+  renderDispatches();
+  refreshDispatchSelect();
+  renderRcpItems();
+  renderReceipts();
+  renderStockReport();
+}
 
 /* ==================== لوحة المتابعة ==================== */
 document.querySelectorAll('.chiprow .chip[data-view]').forEach(chip=>{
