@@ -128,6 +128,17 @@
   "cashClose": [],
   "transfers": [
     {
+      "id": "mtq1h4zcve8yi60",
+      "created_at": "2026-09-06T16:41:37.656Z",
+      "date": "2026-09-06",
+      "branch": "روعة المنار",
+      "fromBox": "نقدي",
+      "toBox": "عهدة",
+      "amount": 1587.75,
+      "notes": "صافي العهدة الى تاريخ 6-9",
+      "archiveNo": "TRF-RMN-001"
+    },
+    {
       "id": "mtq1g9g4wn3h3fa",
       "created_at": "2026-09-06T16:40:56.788Z",
       "date": "2026-09-06",
@@ -151,7 +162,8 @@
     "CUS-FAK": 3,
     "STK": 1,
     "OUT": 3,
-    "RCP": 1
+    "RCP": 1,
+    "TRF-RMN": 1
   },
   "warehouses": [
     {
