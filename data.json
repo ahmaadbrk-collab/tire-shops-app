@@ -161,27 +161,5 @@
       "archiveNo": "OUT-001"
     }
   ],
-  "receipts": [
-    {
-      "id": "mtpgmd6sodcnhey",
-      "created_at": "2026-09-06T06:57:49.636Z",
-      "date": "2026-09-06",
-      "dispatchId": "mtoj07vglq06v9e",
-      "dispatchArchiveNo": "OUT-001",
-      "warehouse": "مستودع فخامة الاطار",
-      "items": [
-        {
-          "itemName": "كومفروسر",
-          "size": "265/65/18",
-          "dispatchedQty": 1,
-          "sold": true,
-          "customerName": "مسسسييس",
-          "price": 1000,
-          "soldQty": 1
-        }
-      ],
-      "notes": "",
-      "archiveNo": "RCP-001"
-    }
-  ]
+  "receipts": []
 }
