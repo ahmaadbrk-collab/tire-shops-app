@@ -92,11 +92,27 @@
   .print-statement{font-size:14px; margin:20px 0; line-height:1.8;}
   .print-sign{display:flex; justify-content:space-between; margin-top:60px; font-size:13px;}
   .print-sign div{width:45%; border-top:1px solid #333; padding-top:6px; text-align:center;}
+
+  /* ==== نافذة المعاينة ==== */
+  .preview-modal{display:none; position:fixed; inset:0; background:rgba(15,23,42,.6); z-index:200; align-items:center; justify-content:center; padding:16px;}
+  .preview-modal.open{display:flex;}
+  .preview-box{background:#fff; border-radius:16px; max-width:600px; width:100%; max-height:85vh; display:flex; flex-direction:column; overflow:hidden;}
+  .preview-content{overflow-y:auto; padding:24px; flex:1;}
+  .preview-actions{display:flex; gap:10px; padding:14px 24px; border-top:1px solid var(--border); justify-content:flex-end;}
 </style>
 </head>
 <body>
 
 <div id="print-area"></div>
+<div id="preview-modal" class="preview-modal">
+  <div class="preview-box">
+    <div id="preview-content" class="preview-content"></div>
+    <div class="preview-actions">
+      <button class="btn-primary" id="preview-print-btn" style="width:auto; padding:10px 24px;">🖨️ طباعة</button>
+      <button class="btn-outline" id="preview-close-btn" style="width:auto; padding:10px 24px;">إغلاق</button>
+    </div>
+  </div>
+</div>
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <h2>🏬 نظام متابعة محلات الإطارات</h2>
@@ -350,6 +366,7 @@
           <label class="field"><span>التاريخ *</span><input type="date" id="stk-date"></label>
           <label class="field"><span>المستودع *</span><select id="stk-warehouse"><option value="">اختر المستودع</option></select></label>
         </div>
+        <div id="stk-available" style="margin-bottom:12px;"></div>
         <div class="item-line">
           <div class="item-line-row">
             <label class="field" style="margin-bottom:0;"><span>اسم الصنف</span><input id="stk-item-name" placeholder="مثال: إطار ميشلان"></label>
@@ -380,6 +397,7 @@
           <label class="field"><span>التاريخ *</span><input type="date" id="out-date"></label>
           <label class="field"><span>المستودع *</span><select id="out-warehouse"><option value="">اختر المستودع</option></select></label>
         </div>
+        <div id="out-available" style="margin-bottom:12px;"></div>
         <label class="field"><span>اسم المستلم (المحصل) *</span><input id="out-receiver" placeholder="اسم المستلم"></label>
         <div class="item-line">
           <div class="item-line-row">
@@ -1371,6 +1389,37 @@ function refreshWarehouseSelects(){
   fillSelect(document.getElementById('stk-warehouse'), names, 'اختر المستودع');
   fillSelect(document.getElementById('out-warehouse'), names, 'اختر المستودع');
 }
+function renderAvailableForWarehouse(containerId, warehouse, targetPrefix){
+  const el = document.getElementById(containerId);
+  if(!warehouse){ el.innerHTML = ''; return; }
+  const items = computeStock().filter(s=>s.warehouse===warehouse);
+  if(items.length===0){ el.innerHTML = '<p class="note" style="margin-bottom:0;">ما فيه أصناف متوفرة بهذا المستودع بعد</p>'; return; }
+  el.innerHTML = '<p class="note" style="margin-bottom:6px;">المتوفر بهذا المستودع (اضغط على أي صنف يعبّي بياناته):</p>' +
+    items.map(it=>{
+      const cls = it.qty<=0 ? 'stock-qty-zero' : (it.qty<5 ? 'stock-qty-low' : 'stock-qty-ok');
+      return `<div class="box-row" style="cursor:pointer;" data-pick-item data-name="${it.itemName}" data-size="${it.size}" data-price="${it.lastPrice||0}" data-target="${targetPrefix}">
+        <span>${it.itemName}${it.size?' · '+it.size:''}</span><span class="${cls}">${it.qty}</span>
+      </div>`;
+    }).join('');
+}
+document.getElementById('stk-available').addEventListener('click', (e)=>{
+  const row = e.target.closest('[data-pick-item]');
+  if(!row) return;
+  document.getElementById('stk-item-name').value = row.dataset.name;
+  document.getElementById('stk-item-size').value = row.dataset.size;
+});
+document.getElementById('out-available').addEventListener('click', (e)=>{
+  const row = e.target.closest('[data-pick-item]');
+  if(!row) return;
+  document.getElementById('out-item-name').value = row.dataset.name;
+  document.getElementById('out-item-size').value = row.dataset.size;
+});
+document.getElementById('stk-warehouse').addEventListener('change', ()=>{
+  renderAvailableForWarehouse('stk-available', document.getElementById('stk-warehouse').value, 'stk');
+});
+document.getElementById('out-warehouse').addEventListener('change', ()=>{
+  renderAvailableForWarehouse('out-available', document.getElementById('out-warehouse').value, 'out');
+});
 document.getElementById('wh-add').addEventListener('click', async ()=>{
   const name = document.getElementById('wh-name').value.trim();
   if(!name) return;
@@ -1471,6 +1520,7 @@ document.getElementById('stk-list').addEventListener('click', async (e)=>{
     document.getElementById('stk-date').value = rec.date;
     refreshWarehouseSelects();
     document.getElementById('stk-warehouse').value = rec.warehouse;
+    renderAvailableForWarehouse('stk-available', rec.warehouse, 'stk');
     document.getElementById('stk-notes').value = rec.notes||'';
     stkLines = (rec.items||[]).map(it=>({...it}));
     renderStkLines();
@@ -1538,7 +1588,7 @@ function renderDispatches(){
         <div style="font-size:11px;color:#94A3B8; margin-top:2px;">${d.date} · ${(d.items||[]).length} صنف · ${d.archiveNo||''}</div>
       </div>
       <div style="display:flex; gap:6px;">
-        <button class="btn-outline" style="width:auto; padding:4px 8px; font-size:11px;" data-print-out="${d.id}">🖨️</button>
+        <button class="btn-outline" style="width:auto; padding:4px 10px; font-size:11px;" data-print-out="${d.id}">🖨️ معاينة</button>
         <button class="btn-outline" style="width:auto; padding:4px 8px; font-size:11px;" data-edit-out="${d.id}">✏️</button>
         <button class="del-btn" data-del-out="${d.id}">🗑</button>
       </div>
@@ -1555,6 +1605,7 @@ document.getElementById('out-list').addEventListener('click', async (e)=>{
     document.getElementById('out-date').value = rec.date;
     refreshWarehouseSelects();
     document.getElementById('out-warehouse').value = rec.warehouse;
+    renderAvailableForWarehouse('out-available', rec.warehouse, 'out');
     document.getElementById('out-receiver').value = rec.receiverName||'';
     document.getElementById('out-notes').value = rec.notes||'';
     outLines = (rec.items||[]).map(it=>({...it}));
@@ -1650,7 +1701,7 @@ function renderReceipts(){
         <div style="font-size:11px;color:#94A3B8; margin-top:2px;">${r.date} · إجمالي المباع: ${money(total)} · ${r.archiveNo||''}</div>
       </div>
       <div style="display:flex; gap:6px;">
-        <button class="btn-outline" style="width:auto; padding:4px 8px; font-size:11px;" data-print-rcp="${r.id}">🖨️</button>
+        <button class="btn-outline" style="width:auto; padding:4px 10px; font-size:11px;" data-print-rcp="${r.id}">🖨️ معاينة</button>
         <button class="del-btn" data-del-rcp="${r.id}">🗑</button>
       </div>
     </div>`;
@@ -1663,25 +1714,36 @@ document.getElementById('rcp-list').addEventListener('click', async (e)=>{
   if(printId){ const rec = state.receipts.find(x=>x.id===printId); if(rec) printReceipt(rec); }
 });
 
-/* ---- الطباعة ---- */
+/* ---- المعاينة والطباعة ---- */
+function showPreview(html){
+  document.getElementById('preview-content').innerHTML = html;
+  document.getElementById('preview-modal').classList.add('open');
+}
+document.getElementById('preview-close-btn').addEventListener('click', ()=>{
+  document.getElementById('preview-modal').classList.remove('open');
+});
+document.getElementById('preview-print-btn').addEventListener('click', ()=>{
+  document.getElementById('print-area').innerHTML = document.getElementById('preview-content').innerHTML;
+  window.print();
+});
+
 function printDispatch(d){
   const rows = (d.items||[]).map(it=>`<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.quantity}</td></tr>`).join('');
-  document.getElementById('print-area').innerHTML = `
+  showPreview(`
     <div class="print-title">سند إخراج بضاعة</div>
     <div class="print-sub">رقم السند: ${d.archiveNo||''}</div>
     <div class="print-meta"><span>المستودع: ${d.warehouse}</span><span>التاريخ: ${d.date}</span><span>المستلم: ${d.receiverName}</span></div>
     <table class="print-table"><thead><tr><th>اسم الصنف</th><th>المقاس</th><th>الكمية</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="print-statement">استلمت البضاعة المذكورة أعلاه كما هي بالكميات والمقاسات الموضحة.</div>
     <div class="print-sign"><div>توقيع المستلم: ${d.receiverName}</div><div>توقيع المسؤول</div></div>
-  `;
-  window.print();
+  `);
 }
 function printReceipt(r){
   const sold = (r.items||[]).filter(it=>it.sold && it.soldQty>0);
   const rows = sold.map(it=>`<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.customerName||'-'}</td><td>${it.soldQty}</td><td>${money(it.price)}</td><td>${money(it.price*it.soldQty)}</td></tr>`).join('');
   const total = sold.reduce((a,it)=>a+it.price*it.soldQty,0);
   const returned = (r.items||[]).map(it=>`<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.dispatchedQty-it.soldQty}</td></tr>`).join('');
-  document.getElementById('print-area').innerHTML = `
+  showPreview(`
     <div class="print-title">سند استلام بضاعة</div>
     <div class="print-sub">رقم السند: ${r.archiveNo||''} — مرجع سند الإخراج: ${r.dispatchArchiveNo||''}</div>
     <div class="print-meta"><span>المستودع: ${r.warehouse}</span><span>التاريخ: ${r.date}</span></div>
@@ -1694,8 +1756,7 @@ function printReceipt(r){
     <tbody>${returned}</tbody></table>
     <div class="print-statement">تم استلام البضاعة المتبقية بعد خصم البضاعة التي بيعت منها.</div>
     <div class="print-sign"><div>توقيع المستلم</div><div>توقيع المسؤول</div></div>
-  `;
-  window.print();
+  `);
 }
 
 function renderInventoryTab(){
