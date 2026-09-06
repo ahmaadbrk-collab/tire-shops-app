@@ -125,24 +125,7 @@
       "name": "مستودع فخامة الاطار"
     }
   ],
-  "stockEntries": [
-    {
-      "id": "mtoix0qdgj043zb",
-      "created_at": "2026-09-05T15:14:19.765Z",
-      "date": "2026-09-05",
-      "warehouse": "مستودع فخامة الاطار",
-      "items": [
-        {
-          "itemName": "كومفورسر",
-          "size": "265/65/17",
-          "price": 100,
-          "quantity": 1
-        }
-      ],
-      "notes": "",
-      "archiveNo": "STK-001"
-    }
-  ],
+  "stockEntries": [],
   "dispatches": [],
   "receipts": []
 }
