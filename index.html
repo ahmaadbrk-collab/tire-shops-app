@@ -1648,21 +1648,30 @@ function renderRcpItems(){
         <label class="field" style="margin-bottom:0;"><span>السعر</span><input type="number" step="0.01" data-rcp-price="${i}" value="${it.price||''}" placeholder="0.00"></label>
       </div>
       <label class="field" style="margin-bottom:0;"><span>الكمية المباعة</span><input type="number" step="1" data-rcp-qty="${i}" value="${it.soldQty}" placeholder="0"></label>
-      <div style="font-size:11px; color:#64748B; margin-top:6px;">الإجمالي: <b>${money((it.price||0)*(it.soldQty||0))}</b> · المتبقي للمخزون: <b>${it.dispatchedQty-it.soldQty}</b></div>
+      <div id="rcp-summary-${i}" style="font-size:11px; color:#64748B; margin-top:6px;">الإجمالي: <b>${money((it.price||0)*(it.soldQty||0))}</b> · المتبقي للمخزون: <b>${it.dispatchedQty-it.soldQty}</b></div>
     </div>
   `).join('');
   updateRcpSubmitState();
 }
+function updateRcpRowSummary(i){
+  const el = document.getElementById('rcp-summary-'+i);
+  if(!el) return;
+  const it = rcpItems[i];
+  el.innerHTML = `الإجمالي: <b>${money((it.price||0)*(it.soldQty||0))}</b> · المتبقي للمخزون: <b>${it.dispatchedQty-it.soldQty}</b>`;
+}
 document.getElementById('rcp-items').addEventListener('input', (e)=>{
   const i1 = e.target.dataset.rcpCustomer, i2 = e.target.dataset.rcpPrice, i3 = e.target.dataset.rcpQty;
-  if(i1!==undefined) rcpItems[i1].customerName = e.target.value;
-  if(i2!==undefined) rcpItems[i2].price = parseFloat(e.target.value)||0;
-  if(i3!==undefined) rcpItems[i3].soldQty = Math.min(parseFloat(e.target.value)||0, rcpItems[i3].dispatchedQty);
-  renderRcpItems();
+  if(i1!==undefined){ rcpItems[i1].customerName = e.target.value; return; }
+  if(i2!==undefined){ rcpItems[i2].price = parseFloat(e.target.value)||0; updateRcpRowSummary(i2); return; }
+  if(i3!==undefined){
+    rcpItems[i3].soldQty = Math.min(parseFloat(e.target.value)||0, rcpItems[i3].dispatchedQty);
+    updateRcpRowSummary(i3);
+    return;
+  }
 });
 document.getElementById('rcp-items').addEventListener('change', (e)=>{
   const i = e.target.dataset.rcpSold;
-  if(i!==undefined) rcpItems[i].sold = e.target.checked;
+  if(i!==undefined){ rcpItems[i].sold = e.target.checked; }
 });
 function updateRcpSubmitState(){
   const ok = document.getElementById('rcp-dispatch').value && document.getElementById('rcp-date').value && rcpItems.length>0;
