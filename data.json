@@ -138,7 +138,7 @@
     "SAL-FAK": 30,
     "CUS-FAK": 3,
     "STK": 1,
-    "OUT": 3,
+    "OUT": 4,
     "RCP": 1,
     "TRF-RMN": 1
   },
@@ -151,6 +151,42 @@
   ],
   "stockEntries": [],
   "dispatches": [
+    {
+      "id": "mtv83ewfkkik29e",
+      "created_at": "2026-09-10T07:45:45.519Z",
+      "date": "2026-09-10",
+      "warehouse": "مستودع فخامة الاطار",
+      "receiverName": "عبدالكريم",
+      "items": [
+        {
+          "itemName": "بوتريان",
+          "size": "195/65/15",
+          "quantity": 12
+        },
+        {
+          "itemName": "كومفورسر",
+          "size": "215/55/17",
+          "quantity": 8
+        },
+        {
+          "itemName": "كومفورسر",
+          "size": "215/60/16",
+          "quantity": 8
+        },
+        {
+          "itemName": "بوتريان",
+          "size": "185/65/15",
+          "quantity": 8
+        },
+        {
+          "itemName": "بوتريان",
+          "size": "185/70/14",
+          "quantity": 8
+        }
+      ],
+      "notes": "",
+      "archiveNo": "OUT-004"
+    },
     {
       "id": "mtpvdymreat4yzq",
       "created_at": "2026-09-06T13:51:11.763Z",
