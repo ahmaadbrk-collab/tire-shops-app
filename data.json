@@ -139,7 +139,7 @@
     "CUS-FAK": 3,
     "STK": 1,
     "OUT": 4,
-    "RCP": 3,
+    "RCP": 4,
     "TRF-RMN": 1
   },
   "warehouses": [
@@ -198,5 +198,81 @@
       "archiveNo": "OUT-004"
     }
   ],
-  "receipts": []
+  "receipts": [
+    {
+      "id": "mtx37u71hga7pde",
+      "created_at": "2026-09-11T15:04:46.237Z",
+      "date": "2026-09-10",
+      "dispatchId": "mtv83ewfkkik29e",
+      "dispatchArchiveNo": "OUT-004",
+      "warehouse": "مستودع فخامة الاطار",
+      "items": [
+        {
+          "itemName": "بوتريان",
+          "size": "195/65/15",
+          "dispatchedQty": 12,
+          "sold": false,
+          "customerName": "",
+          "price": 0,
+          "soldQty": 12
+        },
+        {
+          "itemName": "كومفورسر",
+          "size": "215/55/17",
+          "dispatchedQty": 8,
+          "sold": false,
+          "customerName": "",
+          "price": 0,
+          "soldQty": 8
+        },
+        {
+          "itemName": "كومفورسر",
+          "size": "215/60/16",
+          "dispatchedQty": 8,
+          "sold": false,
+          "customerName": "",
+          "price": 0,
+          "soldQty": 8
+        },
+        {
+          "itemName": "بوتريان",
+          "size": "185/65/15",
+          "dispatchedQty": 8,
+          "sold": false,
+          "customerName": "",
+          "price": 0,
+          "soldQty": 8
+        },
+        {
+          "itemName": "بوتريان",
+          "size": "185/70/14",
+          "dispatchedQty": 8,
+          "sold": true,
+          "customerName": "عميل نقدي ",
+          "price": 130,
+          "soldQty": 4
+        },
+        {
+          "itemName": "كومفورسر",
+          "size": "205/55/16",
+          "dispatchedQty": 8,
+          "sold": false,
+          "customerName": "عميل نقدي ",
+          "price": 130,
+          "soldQty": 4
+        },
+        {
+          "itemName": "كومفورسر",
+          "size": "195/15",
+          "dispatchedQty": 2,
+          "sold": true,
+          "customerName": "نوارة الخليج ",
+          "price": 182,
+          "soldQty": 2
+        }
+      ],
+      "notes": "",
+      "archiveNo": "RCP-004"
+    }
+  ]
 }
