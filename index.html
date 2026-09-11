@@ -1357,7 +1357,8 @@ function computeStock(){
   });
   state.receipts.forEach(r=>{
     (r.items||[]).forEach(it=>{
-      const unsold = (Number(it.dispatchedQty)||0) - (Number(it.soldQty)||0);
+      const effectiveSold = it.sold ? (Number(it.soldQty)||0) : 0;
+      const unsold = (Number(it.dispatchedQty)||0) - effectiveSold;
       const k = stockKey(r.warehouse, it.itemName, it.size);
       if(!qty[k]) qty[k] = {warehouse:r.warehouse, itemName:it.itemName, size:it.size, qty:0, lastPrice:0};
       qty[k].qty += unsold;
@@ -1630,14 +1631,17 @@ document.getElementById('rcp-dispatch').addEventListener('change', ()=>{
   if(!rec){ rcpItems=[]; renderRcpItems(); return; }
   rcpItems = (rec.items||[]).map(it=>({
     itemName: it.itemName, size: it.size, dispatchedQty: it.quantity,
-    sold: true, customerName: '', price: 0, soldQty: it.quantity
+    sold: false, customerName: '', price: 0, soldQty: 0
   }));
   renderRcpItems();
 });
+function rcpEffectiveSold(it){ return it.sold ? (Number(it.soldQty)||0) : 0; }
 function renderRcpItems(){
   const el = document.getElementById('rcp-items');
   if(rcpItems.length===0){ el.innerHTML=''; updateRcpSubmitState(); return; }
-  el.innerHTML = rcpItems.map((it,i)=>`
+  el.innerHTML = rcpItems.map((it,i)=>{
+    const eff = rcpEffectiveSold(it);
+    return `
     <div class="item-line">
       <div style="font-weight:600; font-size:12px; margin-bottom:6px;">${it.itemName}${it.size?' · '+it.size:''} (خرج: ${it.dispatchedQty})</div>
       <label style="display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:8px;">
@@ -1647,17 +1651,18 @@ function renderRcpItems(){
         <label class="field" style="margin-bottom:0;"><span>اسم العميل</span><input data-rcp-customer="${i}" value="${it.customerName}" placeholder="اسم العميل"></label>
         <label class="field" style="margin-bottom:0;"><span>السعر</span><input type="number" step="0.01" data-rcp-price="${i}" value="${it.price||''}" placeholder="0.00"></label>
       </div>
-      <label class="field" style="margin-bottom:0;"><span>الكمية المباعة</span><input type="number" step="1" data-rcp-qty="${i}" value="${it.soldQty}" placeholder="0"></label>
-      <div id="rcp-summary-${i}" style="font-size:11px; color:#64748B; margin-top:6px;">الإجمالي: <b>${money((it.price||0)*(it.soldQty||0))}</b> · المتبقي للمخزون: <b>${it.dispatchedQty-it.soldQty}</b></div>
+      <label class="field" style="margin-bottom:0;"><span>الكمية المباعة</span><input type="number" step="1" data-rcp-qty="${i}" value="${it.soldQty||''}" placeholder="0"></label>
+      <div id="rcp-summary-${i}" style="font-size:11px; color:#64748B; margin-top:6px;">الإجمالي: <b>${money((it.price||0)*eff)}</b> · المتبقي للمخزون: <b>${it.dispatchedQty-eff}</b></div>
     </div>
-  `).join('');
+  `;}).join('');
   updateRcpSubmitState();
 }
 function updateRcpRowSummary(i){
   const el = document.getElementById('rcp-summary-'+i);
   if(!el) return;
   const it = rcpItems[i];
-  el.innerHTML = `الإجمالي: <b>${money((it.price||0)*(it.soldQty||0))}</b> · المتبقي للمخزون: <b>${it.dispatchedQty-it.soldQty}</b>`;
+  const eff = rcpEffectiveSold(it);
+  el.innerHTML = `الإجمالي: <b>${money((it.price||0)*eff)}</b> · المتبقي للمخزون: <b>${it.dispatchedQty-eff}</b>`;
 }
 document.getElementById('rcp-items').addEventListener('input', (e)=>{
   const i1 = e.target.dataset.rcpCustomer, i2 = e.target.dataset.rcpPrice, i3 = e.target.dataset.rcpQty;
@@ -1671,7 +1676,7 @@ document.getElementById('rcp-items').addEventListener('input', (e)=>{
 });
 document.getElementById('rcp-items').addEventListener('change', (e)=>{
   const i = e.target.dataset.rcpSold;
-  if(i!==undefined){ rcpItems[i].sold = e.target.checked; }
+  if(i!==undefined){ rcpItems[i].sold = e.target.checked; updateRcpRowSummary(i); }
 });
 function updateRcpSubmitState(){
   const ok = document.getElementById('rcp-dispatch').value && document.getElementById('rcp-date').value && rcpItems.length>0;
@@ -1751,7 +1756,10 @@ function printReceipt(r){
   const sold = (r.items||[]).filter(it=>it.sold && it.soldQty>0);
   const rows = sold.map(it=>`<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.customerName||'-'}</td><td>${it.soldQty}</td><td>${money(it.price)}</td><td>${money(it.price*it.soldQty)}</td></tr>`).join('');
   const total = sold.reduce((a,it)=>a+it.price*it.soldQty,0);
-  const returned = (r.items||[]).map(it=>`<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.dispatchedQty-it.soldQty}</td></tr>`).join('');
+  const returned = (r.items||[]).map(it=>{
+    const eff = it.sold ? (Number(it.soldQty)||0) : 0;
+    return `<tr><td>${it.itemName}</td><td>${it.size||'-'}</td><td>${it.dispatchedQty-eff}</td></tr>`;
+  }).join('');
   showPreview(`
     <div class="print-title">سند استلام بضاعة</div>
     <div class="print-sub">رقم السند: ${r.archiveNo||''} — مرجع سند الإخراج: ${r.dispatchArchiveNo||''}</div>
