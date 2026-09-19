@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qz5wgbpcf4ib",
+      "created_at": "2026-09-19T18:55:20.224Z",
+      "size": "زيكستور 205/60/16",
+      "setPriceBefore": 1043.28,
+      "setPriceAfter": 772.8
+    },
+    {
       "id": "mu8qz5514haz5zq",
       "created_at": "2026-09-19T18:55:19.237Z",
       "size": "سايلون 185/70/14",
