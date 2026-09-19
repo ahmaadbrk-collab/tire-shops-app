@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzgro1okj5dl",
+      "created_at": "2026-09-19T18:55:34.308Z",
+      "size": "كفر بلاك ارو 245/40/20",
+      "setPriceBefore": 1242,
+      "setPriceAfter": 920
+    },
+    {
       "id": "mu8qzfu2ana69zv",
       "created_at": "2026-09-19T18:55:33.098Z",
       "size": "هنكوك 215/45/17",
