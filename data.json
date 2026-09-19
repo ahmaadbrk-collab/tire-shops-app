@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r2ver3bjw1ze",
+      "created_at": "2026-09-19T18:58:13.251Z",
+      "size": "ديل ماكس 195/65/15",
+      "setPriceBefore": 1359.99,
+      "setPriceAfter": 1007.4
+    },
+    {
       "id": "mu8r2unh7ilahs2",
       "created_at": "2026-09-19T18:58:12.269Z",
       "size": "ابتاني 195/55/16",
