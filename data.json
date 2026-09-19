@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzkyls5muuqc",
+      "created_at": "2026-09-19T18:55:39.741Z",
+      "size": "جرين ماكس 225/60/16",
+      "setPriceBefore": 1481.09,
+      "setPriceAfter": 1097.1
+    },
+    {
       "id": "mu8qzk4wzvmn2ai",
       "created_at": "2026-09-19T18:55:38.673Z",
       "size": "هايبلد 245/40/20",
