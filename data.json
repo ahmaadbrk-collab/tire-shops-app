@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzbiss1oibi4",
+      "created_at": "2026-09-19T18:55:27.508Z",
+      "size": "لوفن 235/60/16",
+      "setPriceBefore": 1233.88,
+      "setPriceAfter": 913.99
+    },
+    {
       "id": "mu8qzaqt97e9ovw",
       "created_at": "2026-09-19T18:55:26.501Z",
       "size": "ابتاني 215/50/17",
