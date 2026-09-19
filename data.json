@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r139hg8y5nry",
+      "created_at": "2026-09-19T18:56:50.117Z",
+      "size": "سايلون 285/65/17",
+      "setPriceBefore": 2030.67,
+      "setPriceAfter": 1504.2
+    },
+    {
       "id": "mu8r12e4m5m5cz6",
       "created_at": "2026-09-19T18:56:48.988Z",
       "size": "هنكوك 225/55/17",
