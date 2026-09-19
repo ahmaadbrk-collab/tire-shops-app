@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qza0dpk42rkh",
+      "created_at": "2026-09-19T18:55:25.549Z",
+      "size": "اريسون 195/55/15",
+      "setPriceBefore": 957.57,
+      "setPriceAfter": 709.31
+    },
+    {
       "id": "mu8qz98dkm2g9il",
       "created_at": "2026-09-19T18:55:24.541Z",
       "size": "جودترب 195/55/16",
