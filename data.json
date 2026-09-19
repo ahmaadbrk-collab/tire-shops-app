@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r1vt47uy8q8q",
+      "created_at": "2026-09-19T18:57:27.112Z",
+      "size": "جوديير 225/55/17",
+      "setPriceBefore": 2880.6,
+      "setPriceAfter": 2133.78
+    },
+    {
       "id": "mu8r1uyd2qbgult",
       "created_at": "2026-09-19T18:57:26.005Z",
       "size": "اريسون 225/65/17",
