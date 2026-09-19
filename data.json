@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qz6ssatyttt2",
+      "created_at": "2026-09-19T18:55:21.388Z",
+      "size": "هنكوك 195/50/16",
+      "setPriceBefore": 1189.34,
+      "setPriceAfter": 880.99
+    },
+    {
       "id": "mu8qz5wgbpcf4ib",
       "created_at": "2026-09-19T18:55:20.224Z",
       "size": "زيكستور 205/60/16",
