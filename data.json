@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qz4cweew9t65",
+      "created_at": "2026-09-19T18:55:18.224Z",
+      "size": "لاوفن 185/70/14",
+      "setPriceBefore": 1030.86,
+      "setPriceAfter": 763.6
+    },
+    {
       "id": "mu8qz3j0ka2a9sz",
       "created_at": "2026-09-19T18:55:17.148Z",
       "size": "لوفن 195/55/15",
