@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0sw0u1ay1xj",
+      "created_at": "2026-09-19T18:56:36.672Z",
+      "size": "اطارات اريسون235/55/19",
+      "setPriceBefore": 2092.77,
+      "setPriceAfter": 1550.2
+    },
+    {
       "id": "mu8r0s0qfbeb98d",
       "created_at": "2026-09-19T18:56:35.546Z",
       "size": "رود ستون 235/65/18",
