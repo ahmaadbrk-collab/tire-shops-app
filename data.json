@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0okaw007yhc",
+      "created_at": "2026-09-19T18:56:31.066Z",
+      "size": "بوتريان 265/60/18",
+      "setPriceBefore": 1928.67,
+      "setPriceAfter": 1428.64
+    },
+    {
       "id": "mu8r0npho39lsvd",
       "created_at": "2026-09-19T18:56:29.957Z",
       "size": "اطارات اريسون 215/65/17",
