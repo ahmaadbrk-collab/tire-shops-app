@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0gvsunvlw89",
+      "created_at": "2026-09-19T18:56:21.112Z",
+      "size": "اطارات ارسون 225/60/18",
+      "setPriceBefore": 1643.48,
+      "setPriceAfter": 1217.39
+    },
+    {
       "id": "mu8r0fpklbf8e6l",
       "created_at": "2026-09-19T18:56:19.592Z",
       "size": "كومفورسر 265/70/17",
