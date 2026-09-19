@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r1uyd2qbgult",
+      "created_at": "2026-09-19T18:57:26.005Z",
+      "size": "اريسون 225/65/17",
+      "setPriceBefore": 2080.35,
+      "setPriceAfter": 1541
+    },
+    {
       "id": "mu8r1u14ih59jht",
       "created_at": "2026-09-19T18:57:24.808Z",
       "size": "اريسون 245/50/20",
