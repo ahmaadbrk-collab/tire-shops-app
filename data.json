@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0y2viiqn9ky",
+      "created_at": "2026-09-19T18:56:43.399Z",
+      "size": "جرين ماكس 235/85/16",
+      "setPriceBefore": 1987.2,
+      "setPriceAfter": 1472
+    },
+    {
       "id": "mu8r0x99i7uglaw",
       "created_at": "2026-09-19T18:56:42.333Z",
       "size": "هنكوك 195/15",
