@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r2x0fv3ouawm",
+      "created_at": "2026-09-19T18:58:15.327Z",
+      "size": "كومفورسر 215/55/17",
+      "setPriceBefore": 1511.05,
+      "setPriceAfter": 1119.3
+    },
+    {
       "id": "mu8r2w71tqda6dv",
       "created_at": "2026-09-19T18:58:14.269Z",
       "size": "ديل ماكس 215/60/16",
