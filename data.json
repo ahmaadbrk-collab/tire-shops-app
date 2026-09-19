@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzfu2ana69zv",
+      "created_at": "2026-09-19T18:55:33.098Z",
+      "size": "هنكوك 215/45/17",
+      "setPriceBefore": 1238.77,
+      "setPriceAfter": 917.61
+    },
+    {
       "id": "mu8qzf1eb4n2hkv",
       "created_at": "2026-09-19T18:55:32.066Z",
       "size": "ابتاني 205/65/16",
