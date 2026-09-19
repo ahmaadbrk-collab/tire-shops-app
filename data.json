@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r20yffn7k6rr",
+      "created_at": "2026-09-19T18:57:33.783Z",
+      "size": "سايلون 225/70/15",
+      "setPriceBefore": 1769.85,
+      "setPriceAfter": 1311
+    },
+    {
       "id": "mu8r204oef8qmvz",
       "created_at": "2026-09-19T18:57:32.712Z",
       "size": "لاوفن 215/55/17",
