@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r11h6xvtv5bv",
+      "created_at": "2026-09-19T18:56:47.802Z",
+      "size": "نيكسن 245/60/18",
+      "setPriceBefore": 2373.72,
+      "setPriceAfter": 1758.31
+    },
+    {
       "id": "mu8r10ln8fxfo0a",
       "created_at": "2026-09-19T18:56:46.667Z",
       "size": "ابتاني 245/85/16",
