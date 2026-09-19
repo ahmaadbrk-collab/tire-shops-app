@@ -21,7 +21,7 @@ const GITHUB_ENABLED = !!(GITHUB_TOKEN && GITHUB_REPO);
 
 const EMPTY_DB = {
   sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], counters: {},
-  warehouses: [], stockEntries: [], dispatches: [], receipts: [],
+  warehouses: [], stockEntries: [], dispatches: [], receipts: [], tirePrices: [],
 };
 
 const BRANCH_CODES = { "فخامة الاطار": "FAK", "روائع الافق": "RAF", "روعة المنار": "RMN" };
@@ -243,6 +243,19 @@ makeCollectionRoutes("transfers", ["date", "branch", "fromBox", "toBox", "amount
 
 /* ---------- نظام المخزون ---------- */
 makeCollectionRoutes("warehouses", ["name"], []);
+
+/* ---------- أسعار الكفرات ---------- */
+makeCollectionRoutes("tirePrices", ["size", "setPriceBefore", "setPriceAfter"], ["setPriceBefore", "setPriceAfter"]);
+app.put("/api/tirePrices/:id", requireAuth, async (req, res) => {
+  const rec = db.tirePrices.find((r) => r.id === req.params.id);
+  if (!rec) return res.status(404).json({ error: "not found" });
+  const b = req.body || {};
+  rec.size = b.size !== undefined ? b.size : rec.size;
+  rec.setPriceBefore = b.setPriceBefore !== undefined ? Number(b.setPriceBefore) || 0 : rec.setPriceBefore;
+  rec.setPriceAfter = b.setPriceAfter !== undefined ? Number(b.setPriceAfter) || 0 : rec.setPriceAfter;
+  try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+  res.json({ ok: true });
+});
 
 app.post("/api/stock-entries", requireAuth, async (req, res) => {
   const b = req.body || {};
