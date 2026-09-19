@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r1pi8xugnjwg",
+      "created_at": "2026-09-19T18:57:18.944Z",
+      "size": "اطارات يوكوهاما 215/55/17",
+      "setPriceBefore": 2546.1,
+      "setPriceAfter": 1886
+    },
+    {
       "id": "mu8r1or5585hc33",
       "created_at": "2026-09-19T18:57:17.969Z",
       "size": "يوكوهاما 195/15",
