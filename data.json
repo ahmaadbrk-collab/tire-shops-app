@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r1nyumkk0wxa",
+      "created_at": "2026-09-19T18:57:16.950Z",
+      "size": "اطارات اريسون 275/60/20",
+      "setPriceBefore": 2900.07,
+      "setPriceAfter": 2148.2
+    },
+    {
       "id": "mu8r139hg8y5nry",
       "created_at": "2026-09-19T18:56:50.117Z",
       "size": "سايلون 285/65/17",
