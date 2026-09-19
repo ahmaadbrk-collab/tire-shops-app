@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r2w71tqda6dv",
+      "created_at": "2026-09-19T18:58:14.269Z",
+      "size": "ديل ماكس 215/60/16",
+      "setPriceBefore": 1515.24,
+      "setPriceAfter": 1122.4
+    },
+    {
       "id": "mu8r2ver3bjw1ze",
       "created_at": "2026-09-19T18:58:13.251Z",
       "size": "ديل ماكس 195/65/15",
