@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzda83q18gtc",
+      "created_at": "2026-09-19T18:55:29.792Z",
+      "size": "اطارات سينترا 235/60/16",
+      "setPriceBefore": 1303.86,
+      "setPriceAfter": 965.83
+    },
+    {
       "id": "mu8qzcdlehqeep3",
       "created_at": "2026-09-19T18:55:28.617Z",
       "size": "كومفورسر 225/45/17",
