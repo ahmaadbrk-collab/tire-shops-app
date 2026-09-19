@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r10ln8fxfo0a",
+      "created_at": "2026-09-19T18:56:46.667Z",
+      "size": "ابتاني 245/85/16",
+      "setPriceBefore": 2216.97,
+      "setPriceAfter": 1642.2
+    },
+    {
       "id": "mu8r0zqmqodfcjt",
       "created_at": "2026-09-19T18:56:45.550Z",
       "size": "ابتاني 275/60/20",
