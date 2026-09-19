@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0m3in42t9y3",
+      "created_at": "2026-09-19T18:56:27.870Z",
+      "size": "ابتاني 265/65/18",
+      "setPriceBefore": 1844.37,
+      "setPriceAfter": 1366.2
+    },
+    {
       "id": "mu8r0l99jtjmlwl",
       "created_at": "2026-09-19T18:56:26.781Z",
       "size": "سايلون 235/55/19",
