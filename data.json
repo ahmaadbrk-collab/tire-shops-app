@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0upjipgttvz",
+      "created_at": "2026-09-19T18:56:39.031Z",
+      "size": "جرين ماكس 255/70/18",
+      "setPriceBefore": 1956.15,
+      "setPriceAfter": 1449
+    },
+    {
       "id": "mu8r0tt5buv7jr9",
       "created_at": "2026-09-19T18:56:37.865Z",
       "size": "كومفورسر 285/50/20",
