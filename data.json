@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzf1eb4n2hkv",
+      "created_at": "2026-09-19T18:55:32.066Z",
+      "size": "ابتاني 205/65/16",
+      "setPriceBefore": 1117.8,
+      "setPriceAfter": 828
+    },
+    {
       "id": "mu8qze683fzg3zm",
       "created_at": "2026-09-19T18:55:30.944Z",
       "size": "جرين لاندر 215/55/18",
