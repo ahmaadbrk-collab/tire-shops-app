@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qz20lfq4rpvu",
+      "created_at": "2026-09-19T18:55:15.189Z",
+      "size": "ترزانو 195/50/16",
+      "setPriceBefore": 912.87,
+      "setPriceAfter": 676.2
+    },
+    {
       "id": "mu8qz17kze4ljfm",
       "created_at": "2026-09-19T18:55:14.144Z",
       "size": "ديلماكس 215/45/17",
