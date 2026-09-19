@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0peiow4i347",
+      "created_at": "2026-09-19T18:56:32.154Z",
+      "size": "سايلون 275/70/16",
+      "setPriceBefore": 2036.88,
+      "setPriceAfter": 1508.8
+    },
+    {
       "id": "mu8r0okaw007yhc",
       "created_at": "2026-09-19T18:56:31.066Z",
       "size": "بوتريان 265/60/18",
