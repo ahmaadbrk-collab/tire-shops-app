@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r33sm4y7o9cp",
+      "created_at": "2026-09-19T18:58:24.118Z",
+      "size": "بوتريان 185/65/15",
+      "setPriceBefore": 1280.97,
+      "setPriceAfter": 948.87
+    },
+    {
       "id": "mu8r32xdz6zkzuy",
       "created_at": "2026-09-19T18:58:22.993Z",
       "size": "كومفورسر 205/55/16",
