@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r1u14ih59jht",
+      "created_at": "2026-09-19T18:57:24.808Z",
+      "size": "اريسون 245/50/20",
+      "setPriceBefore": 2595.78,
+      "setPriceAfter": 1922.8
+    },
+    {
       "id": "mu8r1st18kke607",
       "created_at": "2026-09-19T18:57:23.221Z",
       "size": "يوكوهاما وكاله 215/55/17",
