@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r30duv87j60h",
+      "created_at": "2026-09-19T18:58:19.698Z",
+      "size": "كمفورسر 205/65/15",
+      "setPriceBefore": 1341.52,
+      "setPriceAfter": 993.72
+    },
+    {
       "id": "mu8r2ziujn1e66y",
       "created_at": "2026-09-19T18:58:18.582Z",
       "size": "بوتريان 195/65/15",
