@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qz98dkm2g9il",
+      "created_at": "2026-09-19T18:55:24.541Z",
+      "size": "جودترب 195/55/16",
+      "setPriceBefore": 1248.21,
+      "setPriceAfter": 924.6
+    },
+    {
       "id": "mu8qz8cj654o1le",
       "created_at": "2026-09-19T18:55:23.395Z",
       "size": "ارويو 225/45/17",
