@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r1r3w9yxb0to",
+      "created_at": "2026-09-19T18:57:21.020Z",
+      "size": "اريسون 265/70/17",
+      "setPriceBefore": 2645.46,
+      "setPriceAfter": 1959.6
+    },
+    {
       "id": "mu8r1q90ffa2ett",
       "created_at": "2026-09-19T18:57:19.908Z",
       "size": "اريسون 215/55/17",
