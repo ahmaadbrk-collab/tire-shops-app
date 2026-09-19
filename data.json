@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0ywjix8u3kw",
+      "created_at": "2026-09-19T18:56:44.467Z",
+      "size": "هنكوك 225/50/17",
+      "setPriceBefore": 2005.77,
+      "setPriceAfter": 1485.75
+    },
+    {
       "id": "mu8r0y2viiqn9ky",
       "created_at": "2026-09-19T18:56:43.399Z",
       "size": "جرين ماكس 235/85/16",
