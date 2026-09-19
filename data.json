@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0ikxcrb5qqx",
+      "created_at": "2026-09-19T18:56:23.313Z",
+      "size": "اطارات ديلماكس 245/50/20",
+      "setPriceBefore": 1546.29,
+      "setPriceAfter": 1145.4
+    },
+    {
       "id": "mu8r0hpha8rpg0y",
       "created_at": "2026-09-19T18:56:22.181Z",
       "size": "كومفورسر 245/70/17",
