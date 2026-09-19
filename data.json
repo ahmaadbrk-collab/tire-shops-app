@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qz17kze4ljfm",
+      "created_at": "2026-09-19T18:55:14.144Z",
+      "size": "ديلماكس 215/45/17",
+      "setPriceBefore": 776.25,
+      "setPriceAfter": 575
+    },
+    {
       "id": "mu8qz0bfhax5sm7",
       "created_at": "2026-09-19T18:55:12.987Z",
       "size": "ابتاني 165/70/14",
