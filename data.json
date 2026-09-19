@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzjakt0odhq4",
+      "created_at": "2026-09-19T18:55:37.580Z",
+      "size": "كومفرسر 235/45/18",
+      "setPriceBefore": 1422.4,
+      "setPriceAfter": 1053.63
+    },
+    {
       "id": "mu8qziftg4apck8",
       "created_at": "2026-09-19T18:55:36.473Z",
       "size": "كومفورسر 225/55/18",
