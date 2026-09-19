@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r35kvaua2t5g",
+      "created_at": "2026-09-19T18:58:26.431Z",
+      "size": "بوتريان 185/70/14",
+      "setPriceBefore": 1250.69,
+      "setPriceAfter": 926.44
+    },
+    {
       "id": "mu8r34o9t80ssdw",
       "created_at": "2026-09-19T18:58:25.257Z",
       "size": "بوتريان 235/55/18",
