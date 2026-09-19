@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0jfudfhzlti",
+      "created_at": "2026-09-19T18:56:24.426Z",
+      "size": "ابتاني 265/50/20",
+      "setPriceBefore": 1794.69,
+      "setPriceAfter": 1329.4
+    },
+    {
       "id": "mu8r0ikxcrb5qqx",
       "created_at": "2026-09-19T18:56:23.313Z",
       "size": "اطارات ديلماكس 245/50/20",
