@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzhliynuu643",
+      "created_at": "2026-09-19T18:55:35.382Z",
+      "size": "اطارات قود ترب 225/45/18",
+      "setPriceBefore": 1409.67,
+      "setPriceAfter": 1044.2
+    },
+    {
       "id": "mu8qzgro1okj5dl",
       "created_at": "2026-09-19T18:55:34.308Z",
       "size": "كفر بلاك ارو 245/40/20",
