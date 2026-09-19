@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzaqt97e9ovw",
+      "created_at": "2026-09-19T18:55:26.501Z",
+      "size": "ابتاني 215/50/17",
+      "setPriceBefore": 1136.43,
+      "setPriceAfter": 841.8
+    },
+    {
       "id": "mu8qza0dpk42rkh",
       "created_at": "2026-09-19T18:55:25.549Z",
       "size": "اريسون 195/55/15",
