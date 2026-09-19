@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r26axe2mbhx7",
+      "created_at": "2026-09-19T18:57:40.713Z",
+      "size": "كومفرسور 275/65/18",
+      "setPriceBefore": 2080.35,
+      "setPriceAfter": 1541
+    },
+    {
       "id": "mu8r25kob8ho0j4",
       "created_at": "2026-09-19T18:57:39.768Z",
       "size": "ميليفر 215/75/17.5",
