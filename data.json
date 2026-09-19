@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qzk4wzvmn2ai",
+      "created_at": "2026-09-19T18:55:38.673Z",
+      "size": "هايبلد 245/40/20",
+      "setPriceBefore": 1271.68,
+      "setPriceAfter": 941.99
+    },
+    {
       "id": "mu8qzjakt0odhq4",
       "created_at": "2026-09-19T18:55:37.580Z",
       "size": "كومفرسر 235/45/18",
