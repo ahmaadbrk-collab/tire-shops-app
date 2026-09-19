@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qz7kegq6mpm8",
+      "created_at": "2026-09-19T18:55:22.382Z",
+      "size": "اطارات اريسون 175/65/14",
+      "setPriceBefore": 906.66,
+      "setPriceAfter": 671.6
+    },
+    {
       "id": "mu8qz6ssatyttt2",
       "created_at": "2026-09-19T18:55:21.388Z",
       "size": "هنكوك 195/50/16",
