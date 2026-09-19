@@ -445,6 +445,58 @@
     </div>
   </section>
 
+  <!-- تبويب أسعار الكفرات -->
+  <section id="tab-tireprices" class="tabpane">
+    <div class="chiprow">
+      <button class="chip active" data-tpview="setup">إعداد الأسعار</button>
+      <button class="chip" data-tpview="calc">حاسبة العميل</button>
+    </div>
+
+    <div id="tpview-setup" class="tpview">
+      <div class="card">
+        <h3>💰 إضافة / تعديل سعر مقاس</h3>
+        <input type="hidden" id="tp-edit-id">
+        <label class="field"><span>المقاس *</span><input id="tp-size" placeholder="مثال: 175/65R14"></label>
+        <p class="note" style="margin-bottom:8px;">الطقم = ٤ كفرات ثابتة دايماً</p>
+        <div class="row2">
+          <label class="field"><span>سعر الطقم قبل العرض *</span><input type="number" step="0.01" id="tp-before" placeholder="0.00"></label>
+          <label class="field"><span>سعر الطقم بعد العرض *</span><input type="number" step="0.01" id="tp-after" placeholder="0.00"></label>
+        </div>
+        <div class="list-item" style="margin-bottom:12px;">
+          <span style="font-size:12px;color:#64748b;">سعر الكفر الواحد (قبل / بعد)</span>
+          <span style="font-weight:700;" id="tp-preview">0.00 / 0.00</span>
+        </div>
+        <button class="btn-primary" id="tp-submit" disabled>حفظ</button>
+      </div>
+      <div class="card">
+        <h3>📋 قائمة الأسعار (<span id="tp-count">0</span>)</h3>
+        <div id="tp-list"></div>
+      </div>
+    </div>
+
+    <div id="tpview-calc" class="tpview" style="display:none;">
+      <div class="card">
+        <h3>🧮 حاسبة سعر للعميل</h3>
+        <p class="note">اضغط على المقاس اللي يبيه العميل</p>
+        <div id="tp-calc-sizes"></div>
+      </div>
+      <div class="card" id="tp-calc-result-card" style="display:none;">
+        <h3>📐 التفاصيل</h3>
+        <div class="grid3" style="margin-bottom:14px;">
+          <div class="stat" style="background:#F8FAFC;"><div class="lbl" style="color:#64748B;">قبل العرض</div><div class="val" id="tp-calc-before-unit">0.00</div></div>
+          <div class="stat" style="background:#F0FDF4;"><div class="lbl" style="color:#15803D;">بعد العرض</div><div class="val" id="tp-calc-after-unit">0.00</div></div>
+          <div class="stat" style="background:#FEF2F2;"><div class="lbl" style="color:#DC2626;">التوفير للكفر</div><div class="val" id="tp-calc-save-unit">0.00</div></div>
+        </div>
+        <label class="field"><span>الكمية اللي يبيها العميل</span><input type="number" step="1" id="tp-calc-qty" placeholder="مثال: 4"></label>
+        <div class="grid3">
+          <div class="stat" style="background:#F8FAFC;"><div class="lbl" style="color:#64748B;">الإجمالي قبل</div><div class="val" id="tp-calc-total-before">0.00</div></div>
+          <div class="stat" style="background:#F0FDF4;"><div class="lbl" style="color:#15803D;">الإجمالي بعد</div><div class="val" id="tp-calc-total-after">0.00</div></div>
+          <div class="stat" style="background:#FEF2F2;"><div class="lbl" style="color:#DC2626;">إجمالي التوفير</div><div class="val" id="tp-calc-total-save">0.00</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- تبويب الموظفين -->
   <section id="tab-employees" class="tabpane">
     <div class="card">
@@ -563,12 +615,13 @@
 </main>
 
 <nav class="bottom">
-  <div class="wrap" style="grid-template-columns:repeat(7,1fr);">
+  <div class="wrap" style="grid-template-columns:repeat(8,1fr);">
     <button data-tab="sales" class="active"><span class="ic">🧾</span>مبيعات</button>
     <button data-tab="expenses"><span class="ic">💸</span>مصروفات</button>
     <button data-tab="income"><span class="ic">⬇️</span>وارد نقدي</button>
     <button data-tab="recon"><span class="ic">🏦</span>تسويات</button>
     <button data-tab="inventory"><span class="ic">📦</span>مخزون</button>
+    <button data-tab="tireprices"><span class="ic">💰</span>أسعار</button>
     <button data-tab="employees"><span class="ic">👥</span>موظفين</button>
     <button data-tab="dashboard"><span class="ic">📊</span>تقارير</button>
   </div>
@@ -613,7 +666,7 @@ async function apiPut(url, body){
   return r.json();
 }
 
-let state = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], warehouses: [], stockEntries: [], dispatches: [], receipts: [] };
+let state = { sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], warehouses: [], stockEntries: [], dispatches: [], receipts: [], tirePrices: [] };
 
 async function loadAllFromServer(){
   try{
@@ -630,6 +683,7 @@ async function loadAllFromServer(){
     state.stockEntries = data.stockEntries || [];
     state.dispatches = data.dispatches || [];
     state.receipts = data.receipts || [];
+    state.tirePrices = data.tirePrices || [];
   }catch(e){
     toast('تعذر تحميل البيانات، تأكد من الاتصال');
   }
@@ -708,6 +762,16 @@ document.querySelectorAll('#tab-inventory .chip').forEach(chip=>{
   });
 });
 
+document.querySelectorAll('#tab-tireprices .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#tab-tireprices .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    document.querySelectorAll('#tab-tireprices .tpview').forEach(v=>v.style.display='none');
+    document.getElementById('tpview-'+chip.dataset.tpview).style.display='block';
+    if(chip.dataset.tpview==='calc') renderTpCalcSizes();
+  });
+});
+
 /* ==================== التنقل بين التبويبات ==================== */
 document.querySelectorAll('nav.bottom button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -718,6 +782,7 @@ document.querySelectorAll('nav.bottom button').forEach(btn=>{
     if(btn.dataset.tab === 'dashboard') renderDashboard();
     if(btn.dataset.tab === 'employees') renderEmployeesTab();
     if(btn.dataset.tab === 'inventory') renderInventoryTab();
+    if(btn.dataset.tab === 'tireprices') renderTirePricesTab();
   });
 });
 
@@ -1787,6 +1852,116 @@ function renderInventoryTab(){
   renderRcpItems();
   renderReceipts();
   renderStockReport();
+}
+
+/* ==================== أسعار الكفرات ==================== */
+const TIRE_SET_QTY = 4; // الطقم ثابت دايماً 4 كفرات
+
+function updateTpPreview(){
+  const before = parseFloat(document.getElementById('tp-before').value)||0;
+  const after = parseFloat(document.getElementById('tp-after').value)||0;
+  document.getElementById('tp-preview').textContent = money(before/TIRE_SET_QTY) + ' / ' + money(after/TIRE_SET_QTY);
+  updateTpSubmitState();
+}
+function updateTpSubmitState(){
+  const ok = document.getElementById('tp-size').value.trim() && document.getElementById('tp-before').value && document.getElementById('tp-after').value;
+  document.getElementById('tp-submit').disabled = !ok;
+}
+['tp-before','tp-after'].forEach(id=>document.getElementById(id).addEventListener('input', updateTpPreview));
+document.getElementById('tp-size').addEventListener('input', updateTpSubmitState);
+
+document.getElementById('tp-submit').addEventListener('click', async ()=>{
+  const editId = document.getElementById('tp-edit-id').value;
+  const payload = {
+    size: document.getElementById('tp-size').value.trim(),
+    setPriceBefore: parseFloat(document.getElementById('tp-before').value)||0,
+    setPriceAfter: parseFloat(document.getElementById('tp-after').value)||0,
+  };
+  document.getElementById('tp-submit').disabled = true;
+  try{
+    if(editId){ await apiPut('/api/tirePrices/'+editId, payload); toast('تم تحديث السعر'); }
+    else{ await apiPost('/api/tirePrices', payload); toast('تم حفظ السعر'); }
+    document.getElementById('tp-edit-id').value='';
+    document.getElementById('tp-size').value=''; document.getElementById('tp-before').value=''; document.getElementById('tp-after').value='';
+    document.getElementById('tp-preview').textContent = '0.00 / 0.00';
+    await loadAllFromServer();
+  }catch(e){ toast('تعذر الحفظ'); }
+  updateTpSubmitState();
+});
+
+function renderTirePricesList(){
+  document.getElementById('tp-count').textContent = state.tirePrices.length;
+  const el = document.getElementById('tp-list');
+  if(state.tirePrices.length===0){ el.innerHTML = '<div class="empty">ما فيه أسعار مسجلة بعد</div>'; return; }
+  el.innerHTML = state.tirePrices.map(t=>{
+    const beforeUnit = (t.setPriceBefore||0)/TIRE_SET_QTY;
+    const afterUnit = (t.setPriceAfter||0)/TIRE_SET_QTY;
+    return `
+    <div class="list-item">
+      <div>
+        <div style="font-weight:700; font-size:13px;">${t.size}</div>
+        <div style="font-size:11px;color:#94A3B8; margin-top:2px;">الطقم: ${money(t.setPriceBefore)} → ${money(t.setPriceAfter)} · الكفر: ${money(beforeUnit)} → <b style="color:#15803D;">${money(afterUnit)}</b></div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-outline" style="width:auto; padding:4px 10px; font-size:11px;" data-edit-tp="${t.id}">✏️ تعديل</button>
+        <button class="del-btn" data-del-tp="${t.id}">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('tp-list').addEventListener('click', async (e)=>{
+  const delId = e.target.closest('[data-del-tp]')?.dataset.delTp;
+  if(delId){ try{ await apiDelete('/api/tirePrices/'+delId); await loadAllFromServer(); }catch(err){ toast('تعذر الحذف'); } return; }
+  const editId = e.target.closest('[data-edit-tp]')?.dataset.editTp;
+  if(editId){
+    const rec = state.tirePrices.find(x=>x.id===editId);
+    if(!rec) return;
+    document.getElementById('tp-edit-id').value = editId;
+    document.getElementById('tp-size').value = rec.size;
+    document.getElementById('tp-before').value = rec.setPriceBefore;
+    document.getElementById('tp-after').value = rec.setPriceAfter;
+    updateTpPreview();
+    toast('عدّل البيانات واضغط حفظ');
+  }
+});
+
+/* ---- حاسبة العميل ---- */
+let tpSelectedSize = null;
+function renderTpCalcSizes(){
+  const el = document.getElementById('tp-calc-sizes');
+  if(state.tirePrices.length===0){ el.innerHTML = '<div class="empty">لسا ما فيه أسعار مُعدّة، روح "إعداد الأسعار" أول</div>'; return; }
+  el.innerHTML = state.tirePrices.map(t=>`
+    <button class="chip" style="margin:0 4px 8px 0;" data-pick-size="${t.id}">${t.size}</button>
+  `).join('');
+}
+document.getElementById('tp-calc-sizes').addEventListener('click', (e)=>{
+  const id = e.target.closest('[data-pick-size]')?.dataset.pickSize;
+  if(!id) return;
+  tpSelectedSize = state.tirePrices.find(x=>x.id===id);
+  document.querySelectorAll('#tp-calc-sizes .chip').forEach(c=>c.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('tp-calc-result-card').style.display='block';
+  document.getElementById('tp-calc-qty').value = '';
+  updateTpCalc();
+});
+document.getElementById('tp-calc-qty').addEventListener('input', updateTpCalc);
+function updateTpCalc(){
+  if(!tpSelectedSize) return;
+  const beforeUnit = (tpSelectedSize.setPriceBefore||0)/TIRE_SET_QTY;
+  const afterUnit = (tpSelectedSize.setPriceAfter||0)/TIRE_SET_QTY;
+  const saveUnit = beforeUnit - afterUnit;
+  document.getElementById('tp-calc-before-unit').textContent = money(beforeUnit);
+  document.getElementById('tp-calc-after-unit').textContent = money(afterUnit);
+  document.getElementById('tp-calc-save-unit').textContent = money(saveUnit);
+  const qty = parseFloat(document.getElementById('tp-calc-qty').value)||0;
+  document.getElementById('tp-calc-total-before').textContent = money(beforeUnit*qty);
+  document.getElementById('tp-calc-total-after').textContent = money(afterUnit*qty);
+  document.getElementById('tp-calc-total-save').textContent = money(saveUnit*qty);
+}
+
+function renderTirePricesTab(){
+  renderTirePricesList();
+  renderTpCalcSizes();
 }
 
 /* ==================== لوحة المتابعة ==================== */
