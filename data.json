@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r285tuogm4sd",
+      "created_at": "2026-09-19T18:57:43.121Z",
+      "size": "جورني 225/45/17",
+      "setPriceBefore": 1428.3,
+      "setPriceAfter": 1058
+    },
+    {
       "id": "mu8r27e176w2uit",
       "created_at": "2026-09-19T18:57:42.121Z",
       "size": "جوديير 245/45/18",
