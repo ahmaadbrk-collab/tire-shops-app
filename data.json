@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r27e176w2uit",
+      "created_at": "2026-09-19T18:57:42.121Z",
+      "size": "جوديير 245/45/18",
+      "setPriceBefore": 3027.85,
+      "setPriceAfter": 2242.85
+    },
+    {
       "id": "mu8r26axe2mbhx7",
       "created_at": "2026-09-19T18:57:40.713Z",
       "size": "كومفرسور 275/65/18",
