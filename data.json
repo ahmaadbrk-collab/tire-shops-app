@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8qze683fzg3zm",
+      "created_at": "2026-09-19T18:55:30.944Z",
+      "size": "جرين لاندر 215/55/18",
+      "setPriceBefore": 1304.1,
+      "setPriceAfter": 966
+    },
+    {
       "id": "mu8qzda83q18gtc",
       "created_at": "2026-09-19T18:55:29.792Z",
       "size": "اطارات سينترا 235/60/16",
