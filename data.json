@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r23z4efk4ulh",
+      "created_at": "2026-09-19T18:57:37.696Z",
+      "size": "يوكوهاما 275/60/20",
+      "setPriceBefore": 3670.11,
+      "setPriceAfter": 2718.6
+    },
+    {
       "id": "mu8r233i1ejgo0r",
       "created_at": "2026-09-19T18:57:36.558Z",
       "size": "بلاك ارو 185/65/15",
