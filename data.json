@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r12e4m5m5cz6",
+      "created_at": "2026-09-19T18:56:48.988Z",
+      "size": "هنكوك 225/55/17",
+      "setPriceBefore": 2018.24,
+      "setPriceAfter": 1494.99
+    },
+    {
       "id": "mu8r11h6xvtv5bv",
       "created_at": "2026-09-19T18:56:47.802Z",
       "size": "نيكسن 245/60/18",
