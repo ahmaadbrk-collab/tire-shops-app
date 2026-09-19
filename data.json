@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0s0qfbeb98d",
+      "created_at": "2026-09-19T18:56:35.546Z",
+      "size": "رود ستون 235/65/18",
+      "setPriceBefore": 2370.61,
+      "setPriceAfter": 1756
+    },
+    {
       "id": "mu8r0r4mv81956t",
       "created_at": "2026-09-19T18:56:34.390Z",
       "size": "ابتاني 275/65/18",
