@@ -277,6 +277,13 @@
   ],
   "tirePrices": [
     {
+      "id": "mu8r0tt5buv7jr9",
+      "created_at": "2026-09-19T18:56:37.865Z",
+      "size": "كومفورسر 285/50/20",
+      "setPriceBefore": 1945.28,
+      "setPriceAfter": 1440.95
+    },
+    {
       "id": "mu8r0sw0u1ay1xj",
       "created_at": "2026-09-19T18:56:36.672Z",
       "size": "اطارات اريسون235/55/19",
