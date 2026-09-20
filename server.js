@@ -9,6 +9,9 @@ const APP_USER = process.env.APP_USER || "ahmad";
 // كلمة السر الافتراضية: tire2026 (غيّرها عبر متغير بيئة APP_PASS وقت النشر)
 const APP_PASS = process.env.APP_PASS || "tire2026";
 const SESSION_SECRET = process.env.SESSION_SECRET || "change-this-secret-please";
+// حساب مقيّد (اختياري) يشوف شاشة الأسعار بس، بدون تعديل — غيّرهم عبر متغيرات البيئة
+const VIEWER_USER = process.env.VIEWER_USER || "prices";
+const VIEWER_PASS = process.env.VIEWER_PASS || "prices2026";
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data.json");
 
@@ -23,10 +26,15 @@ const EMPTY_DB = {
   sales: [], expenses: [], income: [], employees: [], custody: [], network: [], cashClose: [], transfers: [], counters: {},
   warehouses: [], stockEntries: [], dispatches: [], receipts: [], tirePrices: [],
 };
+// مهم: { ...EMPTY_DB } نسخ سطحي فقط، والمصفوفات جوه تفضل نفس المرجع فيتلوث EMPTY_DB
+// مع أول عملية unshift حقيقية. نسخ عميق حقيقي هنا يمنع تسرب بيانات حقيقية لأي رد فاضي.
+function freshEmptyDB() {
+  return JSON.parse(JSON.stringify(EMPTY_DB));
+}
 
 const BRANCH_CODES = { "فخامة الاطار": "FAK", "روائع الافق": "RAF", "روعة المنار": "RMN" };
 
-let db = { ...EMPTY_DB };
+let db = freshEmptyDB();
 let githubSha = null; // نحتاجه لتحديث الملف بـ GitHub API
 
 /* ============ تخزين GitHub (دائم) ============ */
@@ -69,11 +77,11 @@ async function githubPutFile(dataObj) {
 /* ============ تخزين محلي (احتياطي عند عدم توفر GitHub) ============ */
 function localLoad() {
   try {
-    if (!fs.existsSync(DB_PATH)) return { ...EMPTY_DB };
+    if (!fs.existsSync(DB_PATH)) return freshEmptyDB();
     return JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
   } catch (e) {
     console.error("Local DB load error:", e.message);
-    return { ...EMPTY_DB };
+    return freshEmptyDB();
   }
 }
 function localSave(dataObj) {
@@ -88,10 +96,10 @@ async function loadDB() {
       const remote = await githubGetFile();
       if (remote) {
         console.log("✅ تم تحميل البيانات من GitHub (تخزين دائم)");
-        return { ...EMPTY_DB, ...remote, counters: remote.counters || {} };
+        return { ...freshEmptyDB(), ...remote, counters: remote.counters || {} };
       }
       console.log("ℹ️ لا يوجد ملف بيانات على GitHub بعد، سيبدأ ملف جديد.");
-      return { ...EMPTY_DB };
+      return freshEmptyDB();
     } catch (e) {
       console.error("⚠️ فشل تحميل البيانات من GitHub:", e.message, "— سيتم استخدام نسخة محلية إن وجدت.");
       return localLoad();
@@ -130,14 +138,15 @@ const app = express();
 app.use(express.json());
 
 const PASS_HASH = bcrypt.hashSync(APP_PASS, 10);
+const VIEWER_PASS_HASH = bcrypt.hashSync(VIEWER_PASS, 10);
 const AUTH_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30; // شهر
 
 function sign(payload) {
   return crypto.createHmac("sha256", SESSION_SECRET).update(payload).digest("hex");
 }
-function makeAuthCookie() {
+function makeAuthCookie(username, role) {
   const expires = Date.now() + AUTH_MAX_AGE_MS;
-  const payload = `${APP_USER}.${expires}`;
+  const payload = `${username}.${expires}.${role}`;
   return `${payload}.${sign(payload)}`;
 }
 function parseCookies(header) {
@@ -149,22 +158,32 @@ function parseCookies(header) {
   });
   return out;
 }
-function isValidAuthCookie(value) {
-  if (!value) return false;
+// يرجع {role} لو الكوكيز صحيحة، أو null لو لا
+function checkAuthCookie(value) {
+  if (!value) return null;
   const parts = value.split(".");
-  if (parts.length !== 3) return false;
-  const [user, expiresStr, sig] = parts;
-  const payload = `${user}.${expiresStr}`;
-  if (sign(payload) !== sig) return false;
-  if (user !== APP_USER) return false;
-  if (Date.now() > Number(expiresStr)) return false;
-  return true;
+  if (parts.length !== 4) return null;
+  const [user, expiresStr, role, sig] = parts;
+  const payload = `${user}.${expiresStr}.${role}`;
+  if (sign(payload) !== sig) return null;
+  if (Date.now() > Number(expiresStr)) return null;
+  if (user === APP_USER && role === "full") return { role: "full" };
+  if (user === VIEWER_USER && role === "limited") return { role: "limited" };
+  return null;
 }
 
 function requireAuth(req, res, next) {
   const cookies = parseCookies(req.headers.cookie);
-  if (isValidAuthCookie(cookies.auth)) return next();
+  const auth = checkAuthCookie(cookies.auth);
+  if (auth) { req.authRole = auth.role; return next(); }
   return res.status(401).json({ error: "unauthorized" });
+}
+// للعمليات اللي تعدّل بيانات — الحساب المقيّد ممنوع منها كلياً
+function requireFullAuth(req, res, next) {
+  const cookies = parseCookies(req.headers.cookie);
+  const auth = checkAuthCookie(cookies.auth);
+  if (auth && auth.role === "full") { req.authRole = auth.role; return next(); }
+  return res.status(403).json({ error: "forbidden" });
 }
 
 function genId() {
@@ -176,13 +195,16 @@ function genId() {
 // فيصمد حتى لو السيرفر توقف مؤقتاً وشغّل نفسه من جديد (شائع بالخطط المجانية).
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
-  if (username === APP_USER && bcrypt.compareSync(password || "", PASS_HASH)) {
-    const cookieVal = makeAuthCookie();
+  let role = null;
+  if (username === APP_USER && bcrypt.compareSync(password || "", PASS_HASH)) role = "full";
+  else if (username === VIEWER_USER && bcrypt.compareSync(password || "", VIEWER_PASS_HASH)) role = "limited";
+  if (role) {
+    const cookieVal = makeAuthCookie(username, role);
     res.setHeader(
       "Set-Cookie",
       `auth=${encodeURIComponent(cookieVal)}; Max-Age=${Math.floor(AUTH_MAX_AGE_MS / 1000)}; Path=/; HttpOnly; SameSite=Lax`
     );
-    return res.json({ ok: true });
+    return res.json({ ok: true, role });
   }
   return res.status(401).json({ error: "بيانات الدخول غير صحيحة" });
 });
@@ -192,11 +214,15 @@ app.post("/api/logout", (req, res) => {
 });
 app.get("/api/me", (req, res) => {
   const cookies = parseCookies(req.headers.cookie);
-  res.json({ loggedIn: isValidAuthCookie(cookies.auth), storage: GITHUB_ENABLED ? "github" : "local" });
+  const auth = checkAuthCookie(cookies.auth);
+  res.json({ loggedIn: !!auth, role: auth ? auth.role : null, storage: GITHUB_ENABLED ? "github" : "local" });
 });
 
 /* ---------- بيانات ---------- */
 app.get("/api/data", requireAuth, (req, res) => {
+  if (req.authRole === "limited") {
+    return res.json({ ...freshEmptyDB(), tirePrices: db.tirePrices });
+  }
   res.json(db);
 });
 
@@ -204,7 +230,7 @@ function makeCollectionRoutes(name, fields, numericFields, routeName, booleanFie
   numericFields = numericFields || [];
   booleanFields = booleanFields || [];
   const route = routeName || name;
-  app.post(`/api/${route}`, requireAuth, async (req, res) => {
+  app.post(`/api/${route}`, requireFullAuth, async (req, res) => {
     const b = req.body || {};
     const record = { id: genId(), created_at: new Date().toISOString() };
     fields.forEach((f) => {
@@ -221,7 +247,7 @@ function makeCollectionRoutes(name, fields, numericFields, routeName, booleanFie
     }
     res.json({ id: record.id, archiveNo: record.archiveNo });
   });
-  app.delete(`/api/${route}/:id`, requireAuth, async (req, res) => {
+  app.delete(`/api/${route}/:id`, requireFullAuth, async (req, res) => {
     db[name] = db[name].filter((r) => r.id !== req.params.id);
     try {
       await saveDB(db);
@@ -246,7 +272,7 @@ makeCollectionRoutes("warehouses", ["name"], []);
 
 /* ---------- أسعار الكفرات ---------- */
 makeCollectionRoutes("tirePrices", ["size", "setPriceBefore", "setPriceAfter"], ["setPriceBefore", "setPriceAfter"]);
-app.put("/api/tirePrices/:id", requireAuth, async (req, res) => {
+app.put("/api/tirePrices/:id", requireFullAuth, async (req, res) => {
   const rec = db.tirePrices.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   const b = req.body || {};
@@ -257,7 +283,7 @@ app.put("/api/tirePrices/:id", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/stock-entries", requireAuth, async (req, res) => {
+app.post("/api/stock-entries", requireFullAuth, async (req, res) => {
   const b = req.body || {};
   const record = {
     id: genId(), created_at: new Date().toISOString(),
@@ -273,7 +299,7 @@ app.post("/api/stock-entries", requireAuth, async (req, res) => {
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ id: record.id, archiveNo: record.archiveNo });
 });
-app.put("/api/stock-entries/:id", requireAuth, async (req, res) => {
+app.put("/api/stock-entries/:id", requireFullAuth, async (req, res) => {
   const rec = db.stockEntries.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   const b = req.body || {};
@@ -289,13 +315,13 @@ app.put("/api/stock-entries/:id", requireAuth, async (req, res) => {
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ ok: true });
 });
-app.delete("/api/stock-entries/:id", requireAuth, async (req, res) => {
+app.delete("/api/stock-entries/:id", requireFullAuth, async (req, res) => {
   db.stockEntries = db.stockEntries.filter((r) => r.id !== req.params.id);
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ ok: true });
 });
 
-app.post("/api/dispatches", requireAuth, async (req, res) => {
+app.post("/api/dispatches", requireFullAuth, async (req, res) => {
   const b = req.body || {};
   const record = {
     id: genId(), created_at: new Date().toISOString(),
@@ -310,7 +336,7 @@ app.post("/api/dispatches", requireAuth, async (req, res) => {
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ id: record.id, archiveNo: record.archiveNo });
 });
-app.put("/api/dispatches/:id", requireAuth, async (req, res) => {
+app.put("/api/dispatches/:id", requireFullAuth, async (req, res) => {
   const rec = db.dispatches.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   const b = req.body || {};
@@ -326,13 +352,13 @@ app.put("/api/dispatches/:id", requireAuth, async (req, res) => {
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ ok: true });
 });
-app.delete("/api/dispatches/:id", requireAuth, async (req, res) => {
+app.delete("/api/dispatches/:id", requireFullAuth, async (req, res) => {
   db.dispatches = db.dispatches.filter((r) => r.id !== req.params.id);
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ ok: true });
 });
 
-app.post("/api/receipts", requireAuth, async (req, res) => {
+app.post("/api/receipts", requireFullAuth, async (req, res) => {
   const b = req.body || {};
   const record = {
     id: genId(), created_at: new Date().toISOString(),
@@ -352,7 +378,7 @@ app.post("/api/receipts", requireAuth, async (req, res) => {
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ id: record.id, archiveNo: record.archiveNo });
 });
-app.put("/api/receipts/:id", requireAuth, async (req, res) => {
+app.put("/api/receipts/:id", requireFullAuth, async (req, res) => {
   const rec = db.receipts.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   const b = req.body || {};
@@ -370,28 +396,28 @@ app.put("/api/receipts/:id", requireAuth, async (req, res) => {
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ ok: true });
 });
-app.delete("/api/receipts/:id", requireAuth, async (req, res) => {
+app.delete("/api/receipts/:id", requireFullAuth, async (req, res) => {
   db.receipts = db.receipts.filter((r) => r.id !== req.params.id);
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ ok: true });
 });
 
 /* ---------- تبديل حالة (رحّل / أُقفل) ---------- */
-app.patch("/api/custody/:id/forwarded", requireAuth, async (req, res) => {
+app.patch("/api/custody/:id/forwarded", requireFullAuth, async (req, res) => {
   const rec = db.custody.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   rec.forwarded = !rec.forwarded;
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ forwarded: rec.forwarded });
 });
-app.patch("/api/cash-close/:id/closed", requireAuth, async (req, res) => {
+app.patch("/api/cash-close/:id/closed", requireFullAuth, async (req, res) => {
   const rec = db.cashClose.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   rec.closed = !rec.closed;
   try { await saveDB(db); } catch (e) { return res.status(500).json({ error: "save failed" }); }
   res.json({ closed: rec.closed });
 });
-app.patch("/api/sales/:id/transferred", requireAuth, async (req, res) => {
+app.patch("/api/sales/:id/transferred", requireFullAuth, async (req, res) => {
   const rec = db.sales.find((r) => r.id === req.params.id);
   if (!rec) return res.status(404).json({ error: "not found" });
   rec.transferred = !rec.transferred;
@@ -400,7 +426,7 @@ app.patch("/api/sales/:id/transferred", requireAuth, async (req, res) => {
 });
 
 /* ---------- نسخة احتياطية ---------- */
-app.get("/api/backup", requireAuth, (req, res) => {
+app.get("/api/backup", requireFullAuth, (req, res) => {
   res.json({ ...db, exportedAt: new Date().toISOString() });
 });
 
